@@ -1,0 +1,14 @@
+/home/tima/SoftWare/Telegram/imperia_pizza/imperia_pizza_back/target/debug/deps/serde-527b1079c6136a5c.d: /home/tima/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/lib.rs /home/tima/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/integer128.rs /home/tima/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/mod.rs /home/tima/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/de.rs /home/tima/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/ser.rs /home/tima/SoftWare/Telegram/imperia_pizza/imperia_pizza_back/target/debug/build/serde-2682fa547d71dfc0/out/private.rs
+
+/home/tima/SoftWare/Telegram/imperia_pizza/imperia_pizza_back/target/debug/deps/libserde-527b1079c6136a5c.rlib: /home/tima/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/lib.rs /home/tima/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/integer128.rs /home/tima/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/mod.rs /home/tima/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/de.rs /home/tima/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/ser.rs /home/tima/SoftWare/Telegram/imperia_pizza/imperia_pizza_back/target/debug/build/serde-2682fa547d71dfc0/out/private.rs
+
+/home/tima/SoftWare/Telegram/imperia_pizza/imperia_pizza_back/target/debug/deps/libserde-527b1079c6136a5c.rmeta: /home/tima/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/lib.rs /home/tima/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/integer128.rs /home/tima/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/mod.rs /home/tima/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/de.rs /home/tima/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/ser.rs /home/tima/SoftWare/Telegram/imperia_pizza/imperia_pizza_back/target/debug/build/serde-2682fa547d71dfc0/out/private.rs
+
+/home/tima/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/lib.rs:
+/home/tima/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/integer128.rs:
+/home/tima/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/mod.rs:
+/home/tima/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/de.rs:
+/home/tima/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/ser.rs:
+/home/tima/SoftWare/Telegram/imperia_pizza/imperia_pizza_back/target/debug/build/serde-2682fa547d71dfc0/out/private.rs:
+
+# env-dep:OUT_DIR=/home/tima/SoftWare/Telegram/imperia_pizza/imperia_pizza_back/target/debug/build/serde-2682fa547d71dfc0/out
