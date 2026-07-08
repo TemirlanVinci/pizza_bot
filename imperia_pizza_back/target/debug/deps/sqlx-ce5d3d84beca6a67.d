@@ -1,0 +1,12 @@
+/home/tima/SoftWare/Telegram/imperia_pizza/imperia_pizza_back/target/debug/deps/sqlx-ce5d3d84beca6a67.d: /home/tima/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/sqlx-0.9.0/src/lib.rs /home/tima/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/sqlx-0.9.0/src/any/mod.rs /home/tima/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/sqlx-0.9.0/src/macros/mod.rs /home/tima/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/sqlx-0.9.0/src/ty_match.rs /home/tima/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/sqlx-0.9.0/src/spec_error.rs /home/tima/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/sqlx-0.9.0/src/lib.md /home/tima/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/sqlx-0.9.0/src/macros/test.md /home/tima/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/sqlx-0.9.0/src/any/install_drivers_note.md
+
+/home/tima/SoftWare/Telegram/imperia_pizza/imperia_pizza_back/target/debug/deps/libsqlx-ce5d3d84beca6a67.rmeta: /home/tima/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/sqlx-0.9.0/src/lib.rs /home/tima/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/sqlx-0.9.0/src/any/mod.rs /home/tima/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/sqlx-0.9.0/src/macros/mod.rs /home/tima/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/sqlx-0.9.0/src/ty_match.rs /home/tima/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/sqlx-0.9.0/src/spec_error.rs /home/tima/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/sqlx-0.9.0/src/lib.md /home/tima/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/sqlx-0.9.0/src/macros/test.md /home/tima/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/sqlx-0.9.0/src/any/install_drivers_note.md
+
+/home/tima/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/sqlx-0.9.0/src/lib.rs:
+/home/tima/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/sqlx-0.9.0/src/any/mod.rs:
+/home/tima/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/sqlx-0.9.0/src/macros/mod.rs:
+/home/tima/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/sqlx-0.9.0/src/ty_match.rs:
+/home/tima/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/sqlx-0.9.0/src/spec_error.rs:
+/home/tima/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/sqlx-0.9.0/src/lib.md:
+/home/tima/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/sqlx-0.9.0/src/macros/test.md:
+/home/tima/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/sqlx-0.9.0/src/any/install_drivers_note.md:
