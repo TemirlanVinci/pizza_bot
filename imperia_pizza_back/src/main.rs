@@ -1,8 +1,4 @@
-use axum::{
-    http::{header::CONTENT_TYPE, Method},
-    routing::{delete, get, post},
-    Router,
-};
+use axum::http::{Method, header::CONTENT_TYPE};
 use dotenvy::dotenv;
 use sqlx::postgres::PgPoolOptions;
 use std::env;
@@ -16,9 +12,7 @@ use tracing_subscriber::EnvFilter;
 // Объявление модулей (без дублей)
 mod handlers;
 mod models;
-
-// Прагматичный импорт модулей целиком
-use handlers::{catalog, favorite, product, product_full};
+mod routes;
 
 #[tokio::main]
 async fn main() {
@@ -33,8 +27,7 @@ async fn main() {
         )
         .init();
 
-    let database_url = env::var("DATABASE_URL")
-        .expect("Переменная DATABASE_URL не найдена в .env");
+    let database_url = env::var("DATABASE_URL").expect("Переменная DATABASE_URL не найдена в .env");
 
     // Пул соединений с БД
     let pool = PgPoolOptions::new()
@@ -51,31 +44,9 @@ async fn main() {
         .allow_headers([CONTENT_TYPE])
         .allow_origin(Any);
 
-    // Сборка роутера
-    let app = Router::new()
-        // Пользователи
-        .route("/api/v1/users/register", post(crate::handlers::users::register_user))
-        // Каталог и товары
-        .route("/api/v1/categories", get(catalog::get_catalog))
-        .route("/api/v1/products", get(product::get_products))
-        .route("/api/v1/products/{id}", get(product_full::get_product_by_id))
-        // Избранное
-        .route(
-            "/api/v1/favorites",
-            get(favorite::get_favorites).post(favorite::add_favorite),
-        )
-        .route(
-            "/api/v1/favorites/{product_id}",
-            delete(favorite::remove_favorite),
-        )
-        // Корзина
-        .route("/api/v1/cart", get(crate::handlers::cart::get_cart))
-        .route("/api/v1/cart/add", post(crate::handlers::cart::add_to_cart))
-        .route("/api/v1/cart/decrement", post(crate::handlers::cart::decrement_cart))
-        .route("/api/v1/cart/item/{id}", delete(crate::handlers::cart::remove_from_cart))
-        // Состояние (пул БД)
+    // Сборка роутера — все домены собраны в routes::build_router()
+    let app = routes::build_router()
         .with_state(pool)
-        // Слои: CORS + автоматическое логирование запросов
         .layer(cors)
         .layer(TraceLayer::new_for_http());
 
