@@ -8,6 +8,7 @@ from aiogram.client.default import DefaultBotProperties
 from config import BOT_TOKEN
 from api.client import init_session, close_session
 from handlers import start, categories, products, favorites, cart
+from handlers.branches import router as branches_router
 
 logging.basicConfig(level=logging.INFO)
 
@@ -20,6 +21,7 @@ dp.include_router(categories.router)
 dp.include_router(products.router)
 dp.include_router(favorites.router)
 dp.include_router(cart.router)
+dp.include_router(branches_router)
 
 
 @dp.callback_query(F.data == "noop")

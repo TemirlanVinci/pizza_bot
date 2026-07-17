@@ -13,24 +13,31 @@ async def cb_favorites(cb: CallbackQuery) -> None:
     await cb.answer()
     favs = await get_favorites(cb.from_user.id)
 
+    has_photo = bool(cb.message.photo)
+
     if favs is None:
-        await cb.message.edit_text("Ошибки загрузки избранного.", reply_markup=kb_back_menu())
+        if has_photo:
+            await cb.message.delete()
+            await cb.message.answer("Ошибки загрузки избранного.", reply_markup=kb_back_menu())
+        else:
+            await cb.message.edit_text("Ошибки загрузки избранного.", reply_markup=kb_back_menu())
         return
     
     if not favs:
-        await cb.message.edit_text(
-            "🤍 <b>Избранное пусто</b>\n\nДобавляйте товары через меню",
-            reply_markup=kb_back_menu(),
-            parse_mode="HTML"
-        )
+        text_empty = "🤍 <b>Избранное пусто</b>\n\nДобавляйте товары через меню"
+        if has_photo:
+            await cb.message.delete()
+            await cb.message.answer(text_empty, reply_markup=kb_back_menu())
+        else:
+            await cb.message.edit_text(text_empty, reply_markup=kb_back_menu())
         return
     
-
-    await cb.message.edit_text(
-        "❤️ <b>Ваше избранное:</b>\n\nНажмите на блюдо, чтобы перейти к заказу.",
-        reply_markup=kb_favorites(favs),
-        parse_mode="HTML"
-            )
+    text_fav = "❤️ <b>Ваше избранное:</b>\n\nНажмите на блюдо, чтобы перейти к заказу."
+    if has_photo:
+        await cb.message.delete()
+        await cb.message.answer(text_fav, reply_markup=kb_favorites(favs))
+    else:
+        await cb.message.edit_text(text_fav, reply_markup=kb_favorites(favs))
 
 
 @router.callback_query(F.data.startswith("prod_view_"))

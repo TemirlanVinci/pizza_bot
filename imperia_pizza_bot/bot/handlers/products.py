@@ -23,41 +23,58 @@ async def show_products(cb: CallbackQuery, product_id: int) -> None:
     is_fav = product_id in fav_ids
 
     icon = "❤️" if is_fav else "🤍"
-    desc = f"\n📝 {product['description']}\n" if product.get("description") else "\n"
-    weight = f"⚖️ {product['weight']} г\n" if product.get("weight") else ""
+    desc = f"\n📝 {product['description']}\n\n" if product.get("description") else "\n"
+    weight = f"⚖️ {product['weight']} г\n\n" if product.get("weight") else ""
 
     text = f"{icon} <b>{product['name']}</b>{desc}{weight}💰 <b>{product['price']} с</b>"
-    photo = product.get("main_image")
+    photo = product.get("image_url")
     markup = kb_product_actions(product_id, is_fav)
 
-    # Убираем состояние "часиков" с нажатой кнопки
     await cb.answer()
 
-    # Сначала гарантированно удаляем старое сообщение
-    try:
-        await cb.message.delete()
-    except TelegramBadRequest:
-        pass # Игнорируем, если сообщение уже было удалено
+    has_photo_now = bool(cb.message.photo)
 
-    # Отправляем новое сообщение (с фото или без)
-    if photo:
-        await cb.message.answer_photo(
-            photo=photo,
-            caption=text,
-            reply_markup=markup,
-            parse_mode="HTML"
-        )
-    else:
-        await cb.message.answer(
-            text=text,
-            reply_markup=markup,
-            parse_mode="HTML"
-        )
+    try:
+        if photo:
+            if has_photo_now:
+                await cb.message.edit_media(
+                    media=InputMediaPhoto(
+                        media=photo,
+                        caption=text,
+                        parse_mode="HTML"
+                    ),
+                    reply_markup=markup
+                )
+            else:
+                try:
+                    await cb.message.delete()
+                except TelegramBadRequest:
+                    pass
+                await cb.message.answer_photo(
+                    photo=photo,
+                    caption=text,
+                    parse_mode="HTML",
+                    reply_markup=markup
+                )
+        else:
+            if has_photo_now:
+                try:
+                    await cb.message.delete()
+                except TelegramBadRequest:
+                    pass
+                await cb.message.answer(text=text, reply_markup=markup, parse_mode="HTML")
+            else:
+                await cb.message.edit_text(text=text, reply_markup=markup, parse_mode="HTML")
+
+    except TelegramBadRequest as e:
+        if "message is not modified" in e.message:
+            raise e
+    
 
 @router.callback_query(F.data.startswith("catprod_"))
 async def cb_product(cb: CallbackQuery) -> None:
     product_id = int(cb.data.split("_")[1])
-    await cb.answer()
+    
     await show_products(cb, product_id)
 
 
