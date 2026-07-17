@@ -6,6 +6,7 @@ use sqlx::FromRow;
 pub struct BranchListItem {
     pub id: i32,
     pub name: String,
+    pub is_active: bool,
 }
 
 /// Полная карточка филиала — под GET /api/v1/branch/:id
