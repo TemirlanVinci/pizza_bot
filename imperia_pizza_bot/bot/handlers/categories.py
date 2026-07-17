@@ -16,23 +16,32 @@ async def show_menu(cb: CallbackQuery, offset: int = 0) -> None:
     
     if not categories:
         try:
-            await cb.message.edit_text(
-                "Не удалось загрузить меню. Попробуйте позже.", 
-                reply_markup=kb_back_menu()
-            )
+            if cb.message.photo:
+                await cb.message.delete()
+                await cb.message.answer(caption="Не удалось загрузить меню. Попробуйте позже.", reply_markup=kb_back_menu())
+            else:
+                await cb.message.edit_text("Не удалось загрузить меню. Попробуйте позже.", reply_markup=kb_back_menu())
         except TelegramBadRequest as e:
             if "message is not modified" in e.message:
                 await cb.answer()
         return
 
+    text = "<b>Меню</b>\n\nВыберите категорию:"
+    reply_markup = kb_categories(categories, offset)
+
     try:
-        await cb.message.edit_text(
-            "<b>Меню</b>\n\nВыберите категорию:", 
-            reply_markup=kb_categories(categories, offset)
-        )
+        if cb.message.photo:
+            try:
+                await cb.message.delete()
+            except TelegramBadRequest as e:
+                pass
+            await cb.message.answer(text=text, reply_markup=reply_markup)
+        else:
+            await cb.message.edit_text(text=text, reply_markup=reply_markup)
+            
     except TelegramBadRequest as e:
         if "message is not modified" in e.message:
-            await cb.message.edit_reply_markup(reply_markup=kb_categories(categories, offset))
+            await cb.message.edit_reply_markup(reply_markup=reply_markup)
             await cb.answer()
         else:
             raise e
@@ -61,11 +70,12 @@ async def cb_category(cb: CallbackQuery) -> None:
     await cb.answer()
 
     products = await get_products_by_category(cat_id, offset)
+    
     if not products:
-        await cb.message.edit_text(
-            "Не удалось загрузить товары. Попробуйте позже.",
-            reply_markup=kb_back_menu()
-        )
+        if cb.message.photo:
+            await cb.message.edit_caption(caption="Не удалось загрузить товары. Попробуйте позже.", reply_markup=kb_back_menu())
+        else:
+            await cb.message.edit_text("Не удалось загрузить товары. Попробуйте позже.", reply_markup=kb_back_menu())
         return
 
     cats = await get_categories()
@@ -79,7 +89,11 @@ async def cb_category(cb: CallbackQuery) -> None:
     has_next = len(products) == PRODUCTS_LIMIT
     page = offset // PRODUCTS_LIMIT + 1
 
-    await cb.message.edit_text(
-        f"<b>{cat_name}</b> - стр. {page}\n\nВыберите товар:",
-        reply_markup=kb_products(products, cat_id, offset, has_next)
-    )
+    text = f"<b>{cat_name}</b> - стр. {page}\n\nВыберите товар:"
+    reply_markup = kb_products(products, cat_id, offset, has_next)
+
+    # ПРОВЕРКА: Если открываем список товаров, а прошлое сообщение было с фото
+    if cb.message.photo:
+        await cb.message.edit_caption(caption=text, reply_markup=reply_markup)
+    else:
+        await cb.message.edit_text(text, reply_markup=reply_markup)
