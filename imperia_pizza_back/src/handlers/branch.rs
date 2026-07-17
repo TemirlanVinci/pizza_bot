@@ -27,7 +27,6 @@ pub async fn list_branches(
         r#"
         SELECT id, name, is_active
         FROM branches
-        WHERE is_active = true
         ORDER BY id
         LIMIT $1 OFFSET $2
         "#,
