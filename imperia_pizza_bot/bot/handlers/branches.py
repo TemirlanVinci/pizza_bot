@@ -20,7 +20,6 @@ async def cb_branches_page(cb: CallbackQuery, state: FSMContext) -> None:
         
     branches = await get_branches(limit=BRANCHES_LIMIT, offset=offset)
 
-    print("DEBUG branches:", branches)
     if not branches and offset == 0:
         await cb.answer("Произошла ошибка при получении филиалов.", show_alert=True)
         return
