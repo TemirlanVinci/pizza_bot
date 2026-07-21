@@ -11,7 +11,7 @@ def kb_cart(items: list) -> InlineKeyboardMarkup:
             text=f"🛍️ {item['name']} — {item['price']} c", 
             callback_data=f"prod_view_{pid}"
         ))
-        
+
         builder.row(
             InlineKeyboardButton(text="➖", callback_data=f"cart_dec_{pid}"),
             InlineKeyboardButton(text=f"{item['quantity']} шт.", callback_data=f"cart_count_{pid}"),

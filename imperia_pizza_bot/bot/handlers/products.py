@@ -4,7 +4,6 @@ from api.products import get_products
 from api.favorites import get_favorites
 from api.cart import cart_add
 from keyboards.products import kb_product_actions
-from keyboards.main import kb_back_menu
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import InputMediaPhoto
 
@@ -22,11 +21,10 @@ async def show_products(cb: CallbackQuery, product_id: int) -> None:
     fav_ids = {f["id"] for f in (favs or [])}
     is_fav = product_id in fav_ids
 
-    icon = "❤️" if is_fav else "🤍"
-    desc = f"\n📝 {product['description']}\n\n" if product.get("description") else "\n"
+    desc = f"\n{product['description']}\n\n" if product.get("description") else "\n"
     weight = f"⚖️ {product['weight']} г\n\n" if product.get("weight") else ""
 
-    text = f"{icon} <b>{product['name']}</b>{desc}{weight}💰 <b>{product['price']} с</b>"
+    text = f"<b>{product['name']}\n</b>{desc}{weight}💰 <b>{product['price']} с</b>"
     photo = product.get("image_url")
     markup = kb_product_actions(product_id, is_fav)
 

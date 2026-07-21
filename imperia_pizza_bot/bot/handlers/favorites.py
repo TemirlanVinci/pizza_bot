@@ -24,7 +24,7 @@ async def cb_favorites(cb: CallbackQuery) -> None:
         return
     
     if not favs:
-        text_empty = "🤍 <b>Избранное пусто</b>\n\nДобавляйте товары через меню"
+        text_empty = "<b>Избранное пусто</b>\n\nДобавляйте товары через меню"
         if has_photo:
             await cb.message.delete()
             await cb.message.answer(text_empty, reply_markup=kb_back_menu())
@@ -32,7 +32,7 @@ async def cb_favorites(cb: CallbackQuery) -> None:
             await cb.message.edit_text(text_empty, reply_markup=kb_back_menu())
         return
     
-    text_fav = "❤️ <b>Ваше избранное:</b>\n\nНажмите на блюдо, чтобы перейти к заказу."
+    text_fav = "<b>Ваше избранное:</b>\n\nНажмите на блюдо, чтобы перейти к заказу."
     if has_photo:
         await cb.message.delete()
         await cb.message.answer(text_fav, reply_markup=kb_favorites(favs))
@@ -53,7 +53,7 @@ async def cb_fav_add(cb: CallbackQuery) -> None:
     res = await add_favorite(cb.from_user.id, product_id)
 
     if res and res.get("status") == "success":
-        await cb.answer("❤️ Добавлено в избранное", show_alert=True)
+        await cb.answer("⭐️ Добавлено в избранное", show_alert=True)
         await show_products(cb, product_id)
     else:
         await cb.answer("Произошла ошибка.", show_alert=True)

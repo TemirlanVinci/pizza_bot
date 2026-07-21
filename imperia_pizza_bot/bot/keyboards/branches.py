@@ -39,15 +39,17 @@ def kb_branches_list(branches: list, offset: int) -> InlineKeyboardMarkup:
         else:
             rows.append([nav[0], nav_center])         
     
-    rows.append([InlineKeyboardButton(text="🍕 К меню", callback_data="menu")])
-    rows.append([InlineKeyboardButton(text="🏠 Главная", callback_data="home")])
-    
+    rows.append([
+        InlineKeyboardButton(text="🍽 К меню", callback_data="menu"),
+        InlineKeyboardButton(text="🏠 Главная", callback_data="home"),
+    ])
+
     return InlineKeyboardMarkup(inline_keyboard=rows)
 
 
 def kb_back_to_branches(offset: int = 0) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text="⬅️ К списку филиалов", callback_data=f"branchpage_{offset}")],
-            [InlineKeyboardButton(text="🏠 Главная", callback_data="home")]
+            [InlineKeyboardButton(text="⬅️ К списку филиалов", callback_data=f"branchpage_{offset}"),
+            InlineKeyboardButton(text="🏠 Главная", callback_data="home")]
         ])
