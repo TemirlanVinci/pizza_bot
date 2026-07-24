@@ -1,11 +1,11 @@
+use crate::models::product::{Product, ProductFilter};
 use axum::{
+    Json,
     extract::{Query, State},
     http::StatusCode,
-    Json,
 };
 use sqlx::{PgPool, Postgres, QueryBuilder};
 use tracing::error;
-use crate::models::product::{Product, ProductFilter};
 
 pub async fn get_products(
     State(pool): State<PgPool>,
@@ -42,7 +42,10 @@ pub async fn get_products(
                 error = %e,
                 "Не удалось получить список товаров"
             );
-            (StatusCode::INTERNAL_SERVER_ERROR, "internal server error".to_string())
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "internal server error".to_string(),
+            )
         })?;
 
     Ok(Json(products))

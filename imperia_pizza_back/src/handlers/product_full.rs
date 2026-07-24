@@ -1,11 +1,11 @@
+use crate::models::product_full::ProductFull;
 use axum::{
+    Json,
     extract::{Path, State},
     http::StatusCode,
-    Json,
 };
 use sqlx::PgPool;
 use tracing::{error, warn};
-use crate::models::product_full::ProductFull;
 
 pub async fn get_product_by_id(
     State(pool): State<PgPool>,
@@ -23,7 +23,7 @@ pub async fn get_product_by_id(
             image_url 
         FROM products 
         WHERE id = $1
-        "#
+        "#,
     )
     .bind(product_id)
     .fetch_one(&pool)
@@ -38,7 +38,10 @@ pub async fn get_product_by_id(
         }
         _ => {
             error!(product_id, error = %e, "Ошибка БД при получении товара");
-            (StatusCode::INTERNAL_SERVER_ERROR, "internal server error".to_string())
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "internal server error".to_string(),
+            )
         }
     })?;
 

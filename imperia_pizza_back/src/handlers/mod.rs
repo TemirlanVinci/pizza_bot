@@ -1,7 +1,9 @@
+pub mod admin;
+pub mod branch;
+pub mod cart;
 pub mod catalog;
+pub mod favorite;
+pub mod orders;
 pub mod product;
 pub mod product_full;
-pub mod favorite;
-pub mod cart;
 pub mod users;
-pub mod branch;

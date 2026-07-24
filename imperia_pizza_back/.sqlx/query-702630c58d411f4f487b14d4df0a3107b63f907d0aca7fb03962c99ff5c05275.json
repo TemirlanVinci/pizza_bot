@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO banned_users (telegram_id, phone_number, ban_reason, banned_by)\n        VALUES ($1, $2, $3, $4)\n        ON CONFLICT (telegram_id) DO UPDATE\n        SET phone_number = EXCLUDED.phone_number,\n            ban_reason = EXCLUDED.ban_reason,\n            banned_by = EXCLUDED.banned_by,\n            banned_at = NOW()\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int8",
+        "Varchar",
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "702630c58d411f4f487b14d4df0a3107b63f907d0aca7fb03962c99ff5c05275"
+}
