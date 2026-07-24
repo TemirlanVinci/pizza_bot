@@ -12,6 +12,7 @@ pub struct ProductFull {
     pub image_url: String,
 }
 
+#[allow(dead_code)] // Reserved for future filtering API endpoints
 #[derive(Debug, Deserialize)]
 pub struct ProductFilter {
     pub category_id: Option<i32>,

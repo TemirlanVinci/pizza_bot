@@ -1,11 +1,7 @@
-use axum::{
-    extract::State,
-    http::StatusCode,
-    Json,
-};
+use crate::models::users::{RegisterUserRequest, UserStatusResponse};
+use axum::{Json, extract::State, http::StatusCode};
 use sqlx::PgPool;
 use tracing::{error, info};
-use crate::models::users::{RegisterUserRequest, UserStatusResponse};
 
 /// POST /api/v1/users/register
 pub async fn register_user(
@@ -33,7 +29,10 @@ pub async fn register_user(
         StatusCode::INTERNAL_SERVER_ERROR
     })?;
 
-    info!(telegram_id = payload.telegram_id, "Пользователь зарегистрирован/уже существует");
+    info!(
+        telegram_id = payload.telegram_id,
+        "Пользователь зарегистрирован/уже существует"
+    );
 
     Ok(Json(UserStatusResponse {
         status: "success".to_string(),

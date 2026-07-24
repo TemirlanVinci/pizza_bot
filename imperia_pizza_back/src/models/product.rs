@@ -6,7 +6,8 @@ pub struct Product {
     pub id: i32,
     pub name: String,
     pub price: i32,
-    #[serde(skip_serializing)] 
+    #[allow(dead_code)] // Field read by SQLx mapping
+    #[serde(skip_serializing)]
     pub category_id: i32,
 }
 

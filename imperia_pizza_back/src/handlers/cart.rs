@@ -1,13 +1,14 @@
 use axum::{
+    Json,
     extract::{Path, Query, State},
     http::StatusCode,
-    Json,
 };
 use sqlx::PgPool;
 use tracing::{error, info};
 
 use crate::models::cart::{
-    CartActionRequest, CartActionResponse, CartQuery, CartResponse, CartItemResponse, StatusResponse,
+    CartActionRequest, CartActionResponse, CartItemResponse, CartQuery, CartResponse,
+    StatusResponse,
 };
 
 // GET /api/v1/cart?user_id=123456789

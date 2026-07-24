@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO cart_items (user_id, product_id, quantity)\n        VALUES ($1, $2, 1)\n        ON CONFLICT (user_id, product_id)\n        DO UPDATE SET quantity = cart_items.quantity + 1\n        RETURNING quantity\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "quantity",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "cart_items",
+            "name": "quantity"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "8a1e0841fe99ae992ccf1d511e11419b60877598a2c592ab604bf84a9049ffd5"
+}

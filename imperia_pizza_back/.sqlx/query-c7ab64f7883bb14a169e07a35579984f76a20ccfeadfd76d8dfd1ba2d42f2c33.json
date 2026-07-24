@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO users (telegram_id)\n        VALUES ($1)\n        ON CONFLICT (telegram_id) DO NOTHING\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "c7ab64f7883bb14a169e07a35579984f76a20ccfeadfd76d8dfd1ba2d42f2c33"
+}

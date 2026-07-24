@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        WITH updated AS (\n            UPDATE cart_items\n            SET quantity = quantity - 1\n            WHERE user_id = $1 AND product_id = $2 AND quantity > 0\n            RETURNING quantity\n        ),\n        deleted AS (\n            DELETE FROM cart_items\n            WHERE user_id = $1 AND product_id = $2 AND quantity = 0\n        )\n        SELECT quantity FROM updated\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "quantity",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "cart_items",
+            "name": "quantity"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "954ddbcd460c9078b3578a53b90e204b736c2962beb11ea6dad0380cbe2c3e4e"
+}

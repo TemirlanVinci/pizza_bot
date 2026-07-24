@@ -1,13 +1,13 @@
-use axum::{
-    extract::{Path, Query, State},
-    http::StatusCode,
-    Json,
-};
-use sqlx::PgPool;
-use tracing::{error, info};
 use crate::models::favorite::{
     AddFavoriteRequest, DeleteFavoriteQuery, FavoriteProduct, GetFavoritesQuery, StatusResponse,
 };
+use axum::{
+    Json,
+    extract::{Path, Query, State},
+    http::StatusCode,
+};
+use sqlx::PgPool;
+use tracing::{error, info};
 
 /// GET /api/v1/favorites
 pub async fn get_favorites(
@@ -40,7 +40,10 @@ pub async fn get_favorites(
             "Не удалось получить список избранного"
         );
         // Клиенту — общий текст, детали только в логах сервера
-        (StatusCode::INTERNAL_SERVER_ERROR, "internal server error".to_string())
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "internal server error".to_string(),
+        )
     })?;
 
     Ok(Json(favorites))
@@ -69,7 +72,10 @@ pub async fn add_favorite(
             error = %e,
             "Не удалось добавить товар в избранное"
         );
-        (StatusCode::INTERNAL_SERVER_ERROR, "internal server error".to_string())
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "internal server error".to_string(),
+        )
     })?;
 
     info!(
@@ -104,7 +110,10 @@ pub async fn remove_favorite(
             error = %e,
             "Не удалось удалить товар из избранного"
         );
-        (StatusCode::INTERNAL_SERVER_ERROR, "internal server error".to_string())
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "internal server error".to_string(),
+        )
     })?;
 
     info!(
