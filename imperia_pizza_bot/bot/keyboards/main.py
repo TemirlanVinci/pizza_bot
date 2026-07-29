@@ -6,7 +6,8 @@ def kb_main_menu() -> InlineKeyboardMarkup:
             [InlineKeyboardButton(text="🍽 Меню", callback_data="menu"),
             InlineKeyboardButton(text="⭐️ Избранное", callback_data="favorites")],
             [InlineKeyboardButton(text="🛍 Корзина", callback_data="cart"),
-            InlineKeyboardButton(text="📍 Филиалы", callback_data="branches_list")]
+            InlineKeyboardButton(text="📍 Филиалы", callback_data="branches_list")],
+            [InlineKeyboardButton(text="  Мои заказы", callback_data="orders_list")]
         ])
 
 
