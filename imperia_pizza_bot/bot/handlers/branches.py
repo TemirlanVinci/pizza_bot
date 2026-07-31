@@ -4,7 +4,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.filters.callback_data import CallbackData
 
 from api.branches import get_branches, get_branch_detail
-from keyboards.branches import kb_branches_list, kb_back_to_branches, BRANCHES_LIMIT
+from keyboards.branches import kb_pickup_branches, kb_back_to_branches, BRANCHES_LIMIT
 
 router = Router()
 
@@ -29,7 +29,7 @@ async def cb_branches_page(cb: CallbackQuery, state: FSMContext) -> None:
 
     await cb.message.edit_text(
         text="📍 **Наши филиалы**\nВыберите удобный для вас филиал:",
-        reply_markup=kb_branches_list(branches, offset),
+        reply_markup=kb_pickup_branches(branches, offset),
         parse_mode="Markdown"
     )
     await cb.answer()

@@ -34,12 +34,12 @@ def _fmt_date(iso: str | None) -> str:
     
 
 def _order_button_text(o: dict) -> str:
-    circle = STATUS_CIRCLE.get(o["status"]), " Неизвестно " # поставить значение
-    oid = o["order_id"]
-    date = _fmt_date(o["created_at"])
-    price = o["created_at"]
-    return f"{circle[0]} #{oid} {circle[1]} {date} {price} cом"
-
+    circle = STATUS_CIRCLE.get(o.get("status"), "⚪")
+    oid = o.get("order_id", o.get("id"))
+    date = _fmt_date(o.get("created_at"))
+    price = o.get("total_price", 0)
+    
+    return f"{circle} #{oid} от {date} — {price} сом"
 
 def kb_delivery_type() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
@@ -51,21 +51,30 @@ def kb_delivery_type() -> InlineKeyboardMarkup:
     )
 
 
-def kb_pickup_branches(branches: list) -> InlineKeyboardMarkup:
-    rows = []    
+def kb_pickup_branches(branches: list, offset: int = 0) -> InlineKeyboardMarkup:
+    rows = []
+
     for b in branches:
-        is_active = str(b.get("is_active", True)).lower() not in ("false", "0", "none")
-        if not is_active:
+        if not isinstance(b, dict):
             continue
+
+        b_id = b.get("id") or b.get("branch_id")
+        name = b.get("name", "Филиал")
+        address = b.get("address") or b.get("location") or ""
+
+        is_active_raw = b.get("is_active", True)
+        is_active = str(is_active_raw).lower() not in ("false", "0", "none")
+
+        full_name = f"{name} ({address})" if address else name
+        status_text = full_name if is_active else f"❌ {full_name} (Закрыт)"
+
         rows.append([
             InlineKeyboardButton(
-                text=f"{b['name']} ({b['address']})",
-                callback_data=f"order_pickbr_{b['id']}"
+                text=status_text,
+                callback_data=f"order_pickbr_{b_id}"
             )
         ])
-    rows.append([
-        InlineKeyboardButton(text="Отменить оформление", callback_data="order_cancel"),
-    ])
+
     return InlineKeyboardMarkup(inline_keyboard=rows)
 
 

@@ -7,7 +7,7 @@ from aiogram.client.default import DefaultBotProperties
 
 from config import BOT_TOKEN
 from api.client import init_session, close_session
-from filters import resfresh_admins
+from filters import refresh_admins
 from handlers import start, categories, products, favorites, cart, orders, admin
 from handlers.branches import router as branches_router
 
@@ -33,6 +33,9 @@ async def cb_noop(cb: CallbackQuery) -> None:
 
 async def main() -> None:
     await init_session()
+
+    await refresh_admins()
+    
     try:
         await dp.start_polling(bot)
     finally:

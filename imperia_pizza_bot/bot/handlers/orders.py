@@ -43,7 +43,7 @@ class OrderStates(StatesGroup):
 def normalize_phone(raw: str) -> str | None:
     digits = re.sub(r"[^\d+]", "", raw)
     if not digits.startswith("+"):
-        digits = "+" + digits.lsstrip("+")
+        digits = "+" + digits.lstrip("+")
     if not PHONE_RE.match(digits):
         return None
     return digits
@@ -65,7 +65,7 @@ async def cb_checkout(cb: CallbackQuery, state: FSMContext) -> None:
         await cb.answer("🛒 Корзина пуста.", show_alert=True)
         return
     
-    await state.cler()
+    await state.clear()
     await cb.answer()
     await render(
         cb,
@@ -76,7 +76,7 @@ async def cb_checkout(cb: CallbackQuery, state: FSMContext) -> None:
 
 @router.callback_query(F.data == "order_cancel")
 async def cb_order_cancel(cb: CallbackQuery, state: FSMContext) -> None:
-    await state.cler()
+    await state.clear()
     await cb.answer("Оформление отменено")
     try:
         await cb.message.delete()
@@ -89,22 +89,29 @@ async def cb_order_cancel(cb: CallbackQuery, state: FSMContext) -> None:
     await cb.message.answer("🛒 Корзина пуста.", reply_markup=kb_back_menu())
 
 
-@router.callback_query(F.data == "order_dtype_")
+@router.callback_query(F.data.startswith("order_dtype_"))
 async def cb_order_dtype_(cb: CallbackQuery, state: FSMContext) -> None:
-    delivery_type = "cb.data.removeprefix('order_dtype_')"
+    delivery_type = cb.data.removeprefix("order_dtype_")
     await state.update_data(delivery_type=delivery_type)
 
     if delivery_type == "pickup":
-        branches = await get_branches(limit=20, offset=0)
+        raw_branches = await get_branches(limit=20, offset=0)
+
+        if isinstance(raw_branches, dict):
+            branches = raw_branches.get("branches") or raw_branches.get("items") or []
+        elif isinstance(raw_branches, list):
+            branches = raw_branches
+        else:
+            branches = []
 
         if not branches:
-            await cb.answer("Произошла ошибка при получении филиалов.", show_alert=True)
+            await cb.answer("Не удалось загрузить список филиалов.", show_alert=True)
             return
 
         await cb.answer()
         await render(
             cb,
-            "<b>Самовывоз</b>\n\nВыберите филиал",
+            "<b>Самовывоз</b>\n\nВыберите филиал:",
             kb_pickup_branches(branches),
         )
         return
@@ -151,9 +158,9 @@ async def ask_phone(target: Message, state: FSMContext) -> None:
     )
 
 
-@router.message(OrderStates.waiting_phone, F.text)
-async def msg_order_phone_text(message: Message, state: FSMContext) -> None:
-    phone = normalize_phone(message.text)
+@router.message(OrderStates.waiting_phone, F.contact)
+async def msg_order_phone_contact(message: Message, state: FSMContext) -> None:
+    phone = normalize_phone(message.contact.phone_number)
     if not phone:
         await message.answer("Некорректный номер телефона. Пожалуйста, отправьте номер в формате +996555123456")
         return
@@ -242,7 +249,6 @@ def build_admin_notification_text(order: dict) -> str:
 
     lines = [
         "<b>Новый заказ</b>",
-        f"Номер заказа: <b>#{order['order_id']}</b>",
         delivery_label,
         f"👤 Клиент: {order.get('user_name', '—')}",
         f"📞 Телефон: {order.get('phone_number', '—')}",
@@ -286,7 +292,7 @@ async def notify_admins(bot: Bot, order: dict) -> None:
             )
 
 
-@router.callback_query(F.data == "order_list")
+@router.callback_query(F.data.in_({"order_list", "orders_list", "my_orders"}))
 async def cb_orders_list(cb: CallbackQuery) -> None:
     raw = await get_user_orders(cb.from_user.id)
     await cb.answer()
@@ -306,9 +312,9 @@ async def cb_orders_list(cb: CallbackQuery) -> None:
     await render(cb, "<b>Ваши заказы:</b>\n\n", kb_orders_list(orders))
 
 
-@router.callback_query(F.data.startswith("order_details_"))
+@router.callback_query(F.data.startswith("order_detail_") | F.data.startswith("order_details_"))
 async def cb_order_detail(cb: CallbackQuery) -> None:
-    order_id = int(cb.data.removeprefix("order_details_"))
+    order_id = int(cb.data.split("_")[-1])
     order = await get_order_detail(order_id)
     await cb.answer()
 

@@ -115,7 +115,7 @@ async def cb_admin_order_status(cb: CallbackQuery) -> None:
         await cb.answer("Не удалось изменить статус заказа.", show_alert=True)
         return
 
-        logger.info("Admin %s changed order %s status to %s", cb.from_user.id, order_id, new_status)
+    logger.info("Admin %s changed order %s status to %s", cb.from_user.id, order_id, new_status)
     await cb.answer(f"Статус обновлён: {STATUS_LABELS.get(new_status, new_status)}")
  
     orders = await get_active_orders()
