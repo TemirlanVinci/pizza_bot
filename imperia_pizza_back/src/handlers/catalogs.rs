@@ -1,21 +1,10 @@
-use crate::models::catalogs::{Catalog, Category};
-use axum::{Json, extract::State, http::StatusCode};
+use crate::db;
+use crate::error::AppError;
+use crate::models::catalogs::Catalog;
+use axum::{Json, extract::State};
 use sqlx::PgPool;
-use tracing::error;
 
-pub async fn get_catalog(
-    State(pool): State<PgPool>,
-) -> Result<Json<Catalog>, (StatusCode, String)> {
-    let categories = sqlx::query_as::<_, Category>("SELECT id, name FROM categories ORDER BY id")
-        .fetch_all(&pool)
-        .await
-        .map_err(|e| {
-            error!(error = %e, "Не удалось получить список категорий");
-            (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                "internal server error".to_string(),
-            )
-        })?;
-
+pub async fn get_catalog(State(pool): State<PgPool>) -> Result<Json<Catalog>, AppError> {
+    let categories = db::catalogs::get_categories(&pool).await?;
     Ok(Json(Catalog { categories }))
 }

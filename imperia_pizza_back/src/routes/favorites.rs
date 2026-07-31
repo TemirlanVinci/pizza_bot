@@ -13,5 +13,8 @@ pub fn router() -> Router<PgPool> {
             "/favorites",
             get(favorites::get_favorites).post(favorites::add_favorite),
         )
-        .route("/favorites/{product_id}", delete(favorites::remove_favorite))
+        .route(
+            "/favorites/{product_id}",
+            delete(favorites::remove_favorite),
+        )
 }

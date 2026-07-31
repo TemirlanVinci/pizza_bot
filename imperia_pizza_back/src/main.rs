@@ -10,6 +10,7 @@ use tracing::info;
 use tracing_subscriber::EnvFilter;
 
 // Объявление модулей (без дублей)
+mod db;
 mod error;
 mod handlers;
 mod models;
