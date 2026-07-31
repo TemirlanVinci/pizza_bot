@@ -1,13 +1,14 @@
 use serde::{Deserialize, Serialize};
+use validator::Validate;
 
 // --- Входящие запросы ---
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Validate)]
 pub struct CartQuery {
     pub user_id: i64,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Validate)]
 pub struct CartActionRequest {
     pub user_id: i64,
     pub product_id: i32,

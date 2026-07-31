@@ -4,6 +4,7 @@ use axum::{
 };
 use sqlx::PgPool;
 use tracing::{info, instrument};
+use validator::Validate;
 
 use crate::db;
 use crate::error::AppError;
@@ -18,6 +19,8 @@ pub async fn list_branches(
     State(pool): State<PgPool>,
     Query(params): Query<BranchListParams>,
 ) -> Result<Json<Vec<BranchListItem>>, AppError> {
+    params.validate()?;
+
     let limit = params.limit.unwrap_or(DEFAULT_LIMIT).clamp(1, MAX_LIMIT);
     let offset = params.offset.unwrap_or(0).max(0);
 
@@ -38,16 +41,10 @@ pub async fn get_branch(
 ) -> Result<Json<Branch>, AppError> {
     info!(branch_id = id, "запрос филиала по id");
 
-    let branch = db::branches::get_branch_by_id(&pool, id).await?;
+    let branch = db::branches::get_branch_by_id(&pool, id)
+        .await?
+        .ok_or(AppError::NotFound)?;
 
-    match branch {
-        Some(branch) => {
-            info!(branch_id = id, "филиал найден");
-            Ok(Json(branch))
-        }
-        None => {
-            info!(branch_id = id, "филиал не найден");
-            Err(AppError::NotFound)
-        }
-    }
+    info!(branch_id = id, "филиал найден");
+    Ok(Json(branch))
 }

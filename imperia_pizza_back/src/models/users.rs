@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
+use validator::Validate;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Validate)]
 pub struct RegisterUserRequest {
     pub telegram_id: i64,
 }

@@ -9,12 +9,15 @@ use axum::{
 };
 use sqlx::PgPool;
 use tracing::info;
+use validator::Validate;
 
 /// GET /api/v1/favorites
 pub async fn get_favorites(
     State(pool): State<PgPool>,
     Query(query): Query<GetFavoritesQuery>,
 ) -> Result<Json<Vec<FavoriteProduct>>, AppError> {
+    query.validate()?;
+
     let limit = query.limit.unwrap_or(10);
     let offset = query.offset.unwrap_or(0);
 
@@ -28,6 +31,8 @@ pub async fn add_favorite(
     State(pool): State<PgPool>,
     Json(payload): Json<AddFavoriteRequest>,
 ) -> Result<Json<StatusResponse>, AppError> {
+    payload.validate()?;
+
     db::favorites::add_favorite(&pool, payload.user_id, payload.product_id).await?;
 
     info!(
@@ -45,6 +50,8 @@ pub async fn remove_favorite(
     Path(product_id): Path<i32>,
     Query(query): Query<DeleteFavoriteQuery>,
 ) -> Result<Json<StatusResponse>, AppError> {
+    query.validate()?;
+
     db::favorites::remove_favorite(&pool, query.user_id, product_id).await?;
 
     info!(

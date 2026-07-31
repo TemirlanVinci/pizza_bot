@@ -4,6 +4,7 @@ use axum::{
 };
 use sqlx::PgPool;
 use tracing::{info, instrument};
+use validator::Validate;
 
 use crate::db;
 use crate::error::AppError;
@@ -20,6 +21,8 @@ pub async fn update_order_status(
     Path(order_id): Path<i32>,
     Json(payload): Json<UpdateOrderStatusRequest>,
 ) -> Result<Json<UpdateOrderStatusResponse>, AppError> {
+    payload.validate()?;
+
     let valid_statuses = [
         "confirmed",
         "cooking",
@@ -66,6 +69,8 @@ pub async fn ban_user(
     State(pool): State<PgPool>,
     Json(payload): Json<BanUserRequest>,
 ) -> Result<Json<StatusSuccessResponse>, AppError> {
+    payload.validate()?;
+
     // Проверка прав администратора
     let is_admin = db::admins::check_admin_active(&pool, payload.admin_tg_id).await?;
     if !is_admin {
@@ -98,6 +103,10 @@ pub async fn get_active_orders(
     State(pool): State<PgPool>,
     payload: Option<Json<AdminCheckRequest>>,
 ) -> Result<Json<Vec<ActiveOrderResponse>>, AppError> {
+    if let Some(Json(ref req)) = payload {
+        req.validate()?;
+    }
+
     if let Some(Json(AdminCheckRequest {
         admin_tg_id: Some(admin_tg_id),
     })) = payload
@@ -119,6 +128,10 @@ pub async fn get_broadcast_users(
     State(pool): State<PgPool>,
     payload: Option<Json<AdminCheckRequest>>,
 ) -> Result<Json<BroadcastUsersResponse>, AppError> {
+    if let Some(Json(ref req)) = payload {
+        req.validate()?;
+    }
+
     if let Some(Json(AdminCheckRequest {
         admin_tg_id: Some(admin_tg_id),
     })) = payload

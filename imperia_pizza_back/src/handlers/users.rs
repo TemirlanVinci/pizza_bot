@@ -4,12 +4,15 @@ use crate::models::users::{RegisterUserRequest, UserStatusResponse};
 use axum::{Json, extract::State};
 use sqlx::PgPool;
 use tracing::info;
+use validator::Validate;
 
 /// POST /api/v1/users/register
 pub async fn register_user(
     State(pool): State<PgPool>,
     Json(payload): Json<RegisterUserRequest>,
 ) -> Result<Json<UserStatusResponse>, AppError> {
+    payload.validate()?;
+
     db::users::register_user(&pool, payload.telegram_id).await?;
 
     info!(

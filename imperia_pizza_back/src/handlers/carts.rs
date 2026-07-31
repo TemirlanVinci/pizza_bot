@@ -4,6 +4,7 @@ use axum::{
 };
 use sqlx::PgPool;
 use tracing::info;
+use validator::Validate;
 
 use crate::db;
 use crate::error::AppError;
@@ -17,6 +18,8 @@ pub async fn get_cart(
     State(pool): State<PgPool>,
     Query(query): Query<CartQuery>,
 ) -> Result<Json<CartResponse>, AppError> {
+    query.validate()?;
+
     let records = db::carts::get_cart(&pool, query.user_id).await?;
 
     let mut items = Vec::with_capacity(records.len());
@@ -49,6 +52,8 @@ pub async fn add_to_cart(
     State(pool): State<PgPool>,
     Json(payload): Json<CartActionRequest>,
 ) -> Result<Json<CartActionResponse>, AppError> {
+    payload.validate()?;
+
     let new_quantity = db::carts::add_to_cart(&pool, payload.user_id, payload.product_id).await?;
 
     info!(
@@ -70,6 +75,8 @@ pub async fn decrement_cart(
     State(pool): State<PgPool>,
     Json(payload): Json<CartActionRequest>,
 ) -> Result<Json<CartActionResponse>, AppError> {
+    payload.validate()?;
+
     let record = db::carts::decrement_cart(&pool, payload.user_id, payload.product_id).await?;
 
     let current_quantity = record.unwrap_or(0);
@@ -94,6 +101,8 @@ pub async fn remove_from_cart(
     Path(product_id): Path<i32>,
     Query(query): Query<CartQuery>,
 ) -> Result<Json<StatusResponse>, AppError> {
+    query.validate()?;
+
     db::carts::remove_from_cart(&pool, query.user_id, product_id).await?;
 
     info!(

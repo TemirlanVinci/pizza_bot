@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use validator::Validate;
 
 // --- Responses ---
 
@@ -16,20 +17,20 @@ pub struct StatusResponse {
 
 // --- Requests ---
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Validate)]
 pub struct GetFavoritesQuery {
     pub user_id: i64,
     pub limit: Option<i64>,
     pub offset: Option<i64>,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Validate)]
 pub struct AddFavoriteRequest {
     pub user_id: i64,
     pub product_id: i32,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Validate)]
 pub struct DeleteFavoriteQuery {
     pub user_id: i64,
 }

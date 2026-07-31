@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
+use validator::Validate;
 
 /// Краткая карточка филиала — под GET /api/v1/branch (список)
 #[derive(Debug, Serialize, FromRow)]
@@ -22,7 +23,7 @@ pub struct Branch {
 }
 
 /// Query-параметры пагинации для списка филиалов
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Validate)]
 pub struct BranchListParams {
     pub limit: Option<i64>,
     pub offset: Option<i64>,

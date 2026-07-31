@@ -1,8 +1,9 @@
 use serde::{Deserialize, Serialize};
+use validator::Validate;
 
 // --- Requests ---
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Validate)]
 pub struct CreateOrderRequest {
     pub user_id: i64,
     pub user_name: String,

@@ -4,6 +4,7 @@ use axum::{
 };
 use sqlx::PgPool;
 use tracing::{info, instrument};
+use validator::Validate;
 
 use crate::db;
 use crate::error::AppError;
@@ -18,6 +19,8 @@ pub async fn create_order(
     State(pool): State<PgPool>,
     Json(payload): Json<CreateOrderRequest>,
 ) -> Result<Json<CreateOrderResponse>, AppError> {
+    payload.validate()?;
+
     if payload.delivery_type != "delivery" && payload.delivery_type != "pickup" {
         return Err(AppError::Validation(
             "Некорректный тип доставки (ожидается 'delivery' или 'pickup')".to_string(),
@@ -98,9 +101,7 @@ pub async fn create_order(
         "Заказ успешно создан"
     );
 
-    let admin_tg_ids = db::orders::get_active_admin_ids(&pool)
-        .await
-        .unwrap_or_default();
+    let admin_tg_ids = db::orders::get_active_admin_ids(&pool).await?;
 
     let response_items: Vec<OrderItemResponse> = cart_items
         .into_iter()
@@ -154,12 +155,9 @@ pub async fn get_order_detail(
     State(pool): State<PgPool>,
     Path(order_id): Path<i32>,
 ) -> Result<Json<OrderDetailResponse>, AppError> {
-    let order_header = db::orders::get_order_detail_header(&pool, order_id).await?;
-
-    let order = match order_header {
-        Some(header) => header,
-        None => return Err(AppError::NotFound),
-    };
+    let order = db::orders::get_order_detail_header(&pool, order_id)
+        .await?
+        .ok_or(AppError::NotFound)?;
 
     let items_records = db::orders::get_order_items(&pool, order_id).await?;
 

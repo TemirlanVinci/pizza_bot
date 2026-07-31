@@ -1,14 +1,15 @@
 use serde::{Deserialize, Serialize};
+use validator::Validate;
 
 // --- Request DTOs ---
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Validate)]
 pub struct UpdateOrderStatusRequest {
     pub admin_tg_id: i64,
     pub status: String, // confirmed, cooking, delivering, completed, cancelled
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Validate)]
 pub struct BanUserRequest {
     pub admin_tg_id: i64,
     pub user_id: i64,
@@ -16,7 +17,7 @@ pub struct BanUserRequest {
     pub ban_reason: Option<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Validate)]
 pub struct AdminCheckRequest {
     pub admin_tg_id: Option<i64>,
 }

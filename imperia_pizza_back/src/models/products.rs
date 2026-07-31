@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
+use validator::Validate;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct Product {
@@ -22,7 +23,7 @@ pub struct ProductFull {
     pub image_url: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Validate)]
 pub struct ProductFilter {
     pub category_id: Option<i32>,
     pub limit: Option<i64>,
