@@ -4,14 +4,14 @@ use axum::{
 };
 use sqlx::PgPool;
 
-use crate::handlers::favorite;
+use crate::handlers::favorites;
 
 /// Роуты домена "избранное"
 pub fn router() -> Router<PgPool> {
     Router::new()
         .route(
             "/favorites",
-            get(favorite::get_favorites).post(favorite::add_favorite),
+            get(favorites::get_favorites).post(favorites::add_favorite),
         )
-        .route("/favorites/{product_id}", delete(favorite::remove_favorite))
+        .route("/favorites/{product_id}", delete(favorites::remove_favorite))
 }

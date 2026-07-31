@@ -8,6 +8,7 @@
 
 - `src/handlers/` — Axum route handlers grouped by domain (`favorites.rs`, `orders.rs`, etc.).
 - `src/models/` — Structs, DTOs, Request/Response body shapes.
+- `src/db/` — **Database Layer**. Contains all `sqlx` queries grouped by domain. Handlers must NOT contain raw SQL queries; they must call functions from this layer.
 - `src/routes/` — Route definitions & Axum router configurations.
 - `src/error.rs` — Centralized `AppError` type and its `IntoResponse` implementation.
 - `src/auth.rs` — Shared-secret auth middleware/extractor for bot-to-backend requests.

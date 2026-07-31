@@ -1,9 +1,8 @@
-pub mod admin;
-pub mod branch;
-pub mod cart;
-pub mod catalog;
-pub mod favorite;
+pub mod admins;
+pub mod branches;
+pub mod carts;
+pub mod catalogs;
+pub mod favorites;
 pub mod orders;
-pub mod product;
-pub mod product_full;
+pub mod products;
 pub mod users;

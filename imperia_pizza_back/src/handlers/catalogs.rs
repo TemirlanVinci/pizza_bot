@@ -1,4 +1,4 @@
-use crate::models::catalog::{Catalog, Category};
+use crate::models::catalogs::{Catalog, Category};
 use axum::{Json, extract::State, http::StatusCode};
 use sqlx::PgPool;
 use tracing::error;

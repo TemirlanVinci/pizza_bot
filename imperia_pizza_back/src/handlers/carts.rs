@@ -6,7 +6,7 @@ use axum::{
 use sqlx::PgPool;
 use tracing::{error, info};
 
-use crate::models::cart::{
+use crate::models::carts::{
     CartActionRequest, CartActionResponse, CartItemResponse, CartQuery, CartResponse,
     StatusResponse,
 };

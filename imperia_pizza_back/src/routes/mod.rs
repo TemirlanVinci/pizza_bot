@@ -1,10 +1,10 @@
 use axum::Router;
 use sqlx::PgPool;
 
-mod admin;
-mod branch;
-mod cart;
-mod catalog;
+mod admins;
+mod branches;
+mod carts;
+mod catalogs;
 mod favorites;
 mod orders;
 mod products;
@@ -18,12 +18,12 @@ pub fn build_router() -> Router<PgPool> {
         "/api/v1",
         Router::new()
             .merge(users::router())
-            .merge(catalog::router())
+            .merge(catalogs::router())
             .merge(products::router())
             .merge(favorites::router())
-            .merge(cart::router())
-            .merge(branch::router())
+            .merge(carts::router())
+            .merge(branches::router())
             .merge(orders::router())
-            .merge(admin::router()),
+            .merge(admins::router()),
     )
 }

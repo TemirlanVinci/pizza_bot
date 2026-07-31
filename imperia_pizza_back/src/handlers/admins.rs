@@ -6,7 +6,7 @@ use axum::{
 use sqlx::PgPool;
 use tracing::{error, info, instrument};
 
-use crate::models::admin::{
+use crate::models::admins::{
     ActiveOrderResponse, AdminCheckRequest, AdminItem, AdminListResponse, BanUserRequest,
     BroadcastUsersResponse, StatusSuccessResponse, UpdateOrderStatusRequest,
     UpdateOrderStatusResponse,

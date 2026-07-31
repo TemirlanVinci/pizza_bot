@@ -1,4 +1,4 @@
-use crate::models::favorite::{
+use crate::models::favorites::{
     AddFavoriteRequest, DeleteFavoriteQuery, FavoriteProduct, GetFavoritesQuery, StatusResponse,
 };
 use axum::{

@@ -6,7 +6,7 @@ use axum::{
 use sqlx::PgPool;
 use tracing::{error, info, instrument};
 
-use crate::models::branch::{Branch, BranchListItem, BranchListParams};
+use crate::models::branches::{Branch, BranchListItem, BranchListParams};
 
 const DEFAULT_LIMIT: i64 = 20;
 const MAX_LIMIT: i64 = 100;
