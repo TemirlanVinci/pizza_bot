@@ -1,6 +1,7 @@
 import re
+import logging
 
-from aiogram import Router, F
+from aiogram import Router, F, Bot
 from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
@@ -22,7 +23,9 @@ from keyboards.orders import (
 )
 from keyboards.main import kb_back_menu
 
+
 router = Router()
+logger = logging.getLogger(__name__)
 
 PHONE_RE = re.compile(r"^\+?\d{9,15}$")
 
@@ -209,7 +212,7 @@ async def cb_order_confirm(cb: CallbackQuery, state: FSMContext) -> None:
         "user_id":cb.from_user.id,
         "user_name": cb.from_user.full_name,
         "phone_number": data["phone_number"],
-        "delivery_type": data ["delibery_type"],
+        "delivery_type": data ["delivery_type"],
         "address": data["address"],
         "payment_method": data["payment_method"],
     }
@@ -225,11 +228,62 @@ async def cb_order_confirm(cb: CallbackQuery, state: FSMContext) -> None:
 
     text = (
         "<b>Заказ оформлен</b>\n\n"
-        f"Номер заказа: <b>#{result.get('total price')} с</b>\n\n"
+        f"Номер заказа: <b>#{result.get('order_id')} с</b>\n\n"
         "Спасибо за заказ!"
     )
 
     await render(cb, text, kb_after_order())
+    await notify_admins(cb.bot, result)
+
+
+def build_admin_notification_text(order: dict) -> str:
+    delivery_type = order.get("delivery_type")
+    delivery_label = "🚚 Доставка" if delivery_type == "delivery" else "🏠 Самовывоз"
+
+    lines = [
+        "<b>Новый заказ</b>",
+        f"Номер заказа: <b>#{order['order_id']}</b>",
+        delivery_label,
+        f"👤 Клиент: {order.get('user_name', '—')}",
+        f"📞 Телефон: {order.get('phone_number', '—')}",
+    ]
+
+    if delivery_type == "delivery":
+        lines.append(f"📍 Адрес: {order.get('address', '—')}")
+
+    payment_method = order.get("payment_method")
+    lines.append(f"💳 Оплата: {PAYMENT_LABELS.get(payment_method, payment_method)}")
+    lines.append("")
+    lines.append("<b>Состав заказа:</b>")
+
+    for item in order.get("items", []):
+        lines.append(
+            f"• {item.get('name')} × {item.get('quantity')} — "
+            f"{item.get('price_at_purchase')} c"
+        )
+
+    lines.append("")
+    lines.append(f"Итого: <b>{order.get('total_price')} c</b>")
+
+    return "\n".join(lines)
+        
+
+async def notify_admins(bot: Bot, order: dict) -> None:
+    admin_ids = order.get("admin_tg_ids") or []
+    if not admin_ids:
+        logger.warning("Заказ #%s: admin_tg_ids пуст, уведомлять некого", order.get("order_id"))
+        return
+
+    text = build_admin_notification_text(order)
+
+    for admin_id in admin_ids:
+        try:
+            await bot.send_message(admin_id, text, parse_mode="HTML")
+        except Exception as e:
+            logger.exception(
+                "Не удалось отправить уведомление админу %s о заказе %s",
+                admin_id, order.get("order_id"),
+            )
 
 
 @router.callback_query(F.data == "order_list")
