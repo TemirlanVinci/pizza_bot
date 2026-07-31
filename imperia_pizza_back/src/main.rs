@@ -1,15 +1,19 @@
-use axum::http::{Method, header::CONTENT_TYPE};
+use axum::{
+    Router,
+    http::{Method, header::CONTENT_TYPE},
+};
 use dotenvy::dotenv;
 use sqlx::postgres::PgPoolOptions;
 use std::env;
 use std::net::SocketAddr;
 use tokio::net::TcpListener;
 use tower_http::cors::{Any, CorsLayer};
-use tower_http::trace::TraceLayer; // Автоматическое логирование HTTP-запросов
+use tower_http::trace::TraceLayer;
 use tracing::info;
 use tracing_subscriber::EnvFilter;
 
 // Объявление модулей (без дублей)
+mod auth;
 mod db;
 mod error;
 mod handlers;
@@ -48,8 +52,13 @@ async fn main() {
         .allow_headers([CONTENT_TYPE])
         .allow_origin(Any);
 
-    // Сборка роутера — все домены собраны в routes::build_router()
-    let app = routes::build_router()
+    // Сборка роутера: защищенные API маршруты + незащищенный /health
+    let api_router =
+        routes::build_router().route_layer(axum::middleware::from_fn(auth::auth_middleware));
+
+    let app = Router::new()
+        .route("/health", axum::routing::get(|| async { "OK" }))
+        .merge(api_router)
         .with_state(pool)
         .layer(cors)
         .layer(TraceLayer::new_for_http());
