@@ -1,0 +1,41 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO orders (user_id, user_name, phone_number, delivery_type, address, payment_method, status, total_price)\n        VALUES ($1, $2, $3, $4, $5, $6, 'confirmed', $7)\n        RETURNING id, COALESCE(to_char(created_at, 'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"'), '') AS created_at\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "orders",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "created_at",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8",
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Text",
+        "Varchar",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      null
+    ]
+  },
+  "hash": "fcd2df87928d77c58b2a809e266c8c1a97a863e0833fa29fb9f1b9490767d82c"
+}

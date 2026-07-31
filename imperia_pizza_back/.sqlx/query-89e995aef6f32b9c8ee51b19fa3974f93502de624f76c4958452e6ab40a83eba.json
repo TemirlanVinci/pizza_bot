@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n            SELECT telegram_id\n            FROM admins\n            WHERE telegram_id = $1 AND is_active = true\n            ",
+  "query": "SELECT telegram_id FROM admins WHERE is_active = true",
   "describe": {
     "columns": [
       {
@@ -16,13 +16,11 @@
       }
     ],
     "parameters": {
-      "Left": [
-        "Int8"
-      ]
+      "Left": []
     },
     "nullable": [
       false
     ]
   },
-  "hash": "8f12546a77748e8d25e2b320a1b369492ab48288180046372771a682af6858c6"
+  "hash": "89e995aef6f32b9c8ee51b19fa3974f93502de624f76c4958452e6ab40a83eba"
 }

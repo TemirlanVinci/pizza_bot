@@ -6,12 +6,13 @@
 
 **Project Structure Strategy (Layered Approach):**
 
-- `src/handlers/` — Axum route handlers grouped by domain (`favorites.rs`, `orders.rs`, etc.).
+- `src/handlers/` — Axum route handlers grouped by domain (`favorites.rs`, `orders.rs`, etc.). Only handles HTTP parsing, validation, calling DB functions, and returning responses.
 - `src/models/` — Structs, DTOs, Request/Response body shapes.
 - `src/db/` — **Database Layer**. Contains all `sqlx` queries grouped by domain. Handlers must NOT contain raw SQL queries; they must call functions from this layer.
 - `src/routes/` — Route definitions & Axum router configurations.
 - `src/error.rs` — Centralized `AppError` type and its `IntoResponse` implementation.
 - `src/auth.rs` — Shared-secret auth middleware/extractor for bot-to-backend requests.
+- `tests/` — **Integration Tests**. Contains API integration tests (e.g., `products_api_test.rs`) using `#[sqlx::test]`.
 - `migrations/` — SQLx database migration scripts.
 - `.sqlx/` — Offline query cache for `sqlx::query!` macros (committed to git).
 - `src/main.rs` — Application entry point & state initialization.

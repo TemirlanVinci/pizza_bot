@@ -1,8 +1,6 @@
-use axum::{
-    Router,
-    http::{Method, header::CONTENT_TYPE},
-};
+use axum::http::{Method, header::CONTENT_TYPE};
 use dotenvy::dotenv;
+use imperia_pizza_back::create_app;
 use sqlx::postgres::PgPoolOptions;
 use std::env;
 use std::net::SocketAddr;
@@ -11,16 +9,6 @@ use tower_http::cors::{Any, CorsLayer};
 use tower_http::trace::TraceLayer;
 use tracing::info;
 use tracing_subscriber::EnvFilter;
-
-// Объявление модулей (без дублей)
-mod auth;
-mod db;
-mod error;
-mod handlers;
-mod models;
-mod routes;
-
-pub use error::AppError;
 
 #[tokio::main]
 async fn main() {
@@ -52,14 +40,8 @@ async fn main() {
         .allow_headers([CONTENT_TYPE])
         .allow_origin(Any);
 
-    // Сборка роутера: защищенные API маршруты + незащищенный /health
-    let api_router =
-        routes::build_router().route_layer(axum::middleware::from_fn(auth::auth_middleware));
-
-    let app = Router::new()
-        .route("/health", axum::routing::get(|| async { "OK" }))
-        .merge(api_router)
-        .with_state(pool)
+    // Сборка роутера через library helper
+    let app = create_app(pool)
         .layer(cors)
         .layer(TraceLayer::new_for_http());
 

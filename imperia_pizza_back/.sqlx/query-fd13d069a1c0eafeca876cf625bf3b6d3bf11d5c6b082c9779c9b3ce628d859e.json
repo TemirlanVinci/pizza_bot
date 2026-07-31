@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO user_addresses (user_id, address)\n        SELECT $1::BIGINT, $2::TEXT\n        WHERE NOT EXISTS (\n            SELECT 1 FROM user_addresses \n            WHERE user_id = $1 AND address = $2\n        )\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int8",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "fd13d069a1c0eafeca876cf625bf3b6d3bf11d5c6b082c9779c9b3ce628d859e"
+}

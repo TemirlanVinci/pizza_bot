@@ -25,6 +25,44 @@ pub struct Branch {
 /// Query-параметры пагинации для списка филиалов
 #[derive(Debug, Deserialize, Validate)]
 pub struct BranchListParams {
+    #[validate(range(min = 1, max = 100))]
     pub limit: Option<i64>,
+    #[validate(range(min = 0))]
     pub offset: Option<i64>,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use validator::Validate;
+
+    #[test]
+    fn test_branch_list_params_valid() {
+        let params = BranchListParams {
+            limit: Some(20),
+            offset: Some(0),
+        };
+        assert!(params.validate().is_ok());
+
+        let none_params = BranchListParams {
+            limit: None,
+            offset: None,
+        };
+        assert!(none_params.validate().is_ok());
+    }
+
+    #[test]
+    fn test_branch_list_params_invalid() {
+        let invalid_limit = BranchListParams {
+            limit: Some(0),
+            offset: Some(0),
+        };
+        assert!(invalid_limit.validate().is_err());
+
+        let invalid_offset = BranchListParams {
+            limit: Some(10),
+            offset: Some(-1),
+        };
+        assert!(invalid_offset.validate().is_err());
+    }
 }
