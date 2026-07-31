@@ -10,9 +10,12 @@ use tracing::info;
 use tracing_subscriber::EnvFilter;
 
 // Объявление модулей (без дублей)
+mod error;
 mod handlers;
 mod models;
 mod routes;
+
+pub use error::AppError;
 
 #[tokio::main]
 async fn main() {
