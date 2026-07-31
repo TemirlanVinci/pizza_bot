@@ -12,8 +12,4 @@ pub fn router() -> Router<PgPool> {
         .route("/orders", post(orders::create_order))
         .route("/orders/user/{user_id}", get(orders::get_user_orders))
         .route("/orders/detail/{order_id}", get(orders::get_order_detail))
-        .route(
-            "/internal/new-order-notification",
-            post(orders::internal_new_order_notification),
-        )
 }

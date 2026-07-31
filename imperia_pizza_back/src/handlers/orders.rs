@@ -7,8 +7,8 @@ use sqlx::PgPool;
 use tracing::{error, info, instrument};
 
 use crate::models::orders::{
-    CreateOrderRequest, CreateOrderResponse, NewOrderNotificationRequest,
-    NewOrderNotificationResponse, OrderDetailResponse, OrderItemResponse, UserOrderResponse,
+    CreateOrderRequest, CreateOrderResponse, OrderDetailResponse, OrderItemResponse,
+    UserOrderResponse,
 };
 
 /// POST /api/v1/orders
@@ -92,12 +92,12 @@ pub async fn create_order(
         (StatusCode::INTERNAL_SERVER_ERROR, "Внутренняя ошибка сервера".to_string())
     })?;
 
-    // Создаём заказ
+    // Создаём заказ и сразу получаем дату создания
     let order_record = sqlx::query!(
         r#"
         INSERT INTO orders (user_id, user_name, phone_number, delivery_type, address, payment_method, status, total_price)
         VALUES ($1, $2, $3, $4, $5, $6, 'confirmed', $7)
-        RETURNING id
+        RETURNING id, COALESCE(to_char(created_at, 'YYYY-MM-DD"T"HH24:MI:SS"Z"'), '') AS created_at
         "#,
         payload.user_id,
         payload.user_name,
@@ -115,9 +115,10 @@ pub async fn create_order(
     })?;
 
     let order_id = order_record.id;
+    let created_at = order_record.created_at.unwrap_or_default();
 
-    // Вставляем товары заказа
-    for item in cart_items {
+    // Вставляем товары заказа (итерируемся по ссылке, чтобы не уничтожить cart_items)
+    for item in &cart_items {
         sqlx::query!(
             r#"
             INSERT INTO order_items (order_id, product_id, name, quantity, price_at_purchase)
@@ -140,11 +141,15 @@ pub async fn create_order(
         })?;
     }
 
-    // Сохраняем телефон и адрес в историй пользователя
+    // Сохраняем телефон в историю пользователя, ТОЛЬКО ЕСЛИ его там еще нет
     sqlx::query!(
         r#"
         INSERT INTO user_phones (user_id, phone_number)
-        VALUES ($1, $2)
+        SELECT $1::BIGINT, $2::VARCHAR
+        WHERE NOT EXISTS (
+            SELECT 1 FROM user_phones 
+            WHERE user_id = $1 AND phone_number = $2
+        )
         "#,
         payload.user_id,
         payload.phone_number
@@ -159,10 +164,15 @@ pub async fn create_order(
         )
     })?;
 
+    // Сохраняем адрес в историю пользователя, ТОЛЬКО ЕСЛИ его там еще нет
     sqlx::query!(
         r#"
         INSERT INTO user_addresses (user_id, address)
-        VALUES ($1, $2)
+        SELECT $1::BIGINT, $2::TEXT
+        WHERE NOT EXISTS (
+            SELECT 1 FROM user_addresses 
+            WHERE user_id = $1 AND address = $2
+        )
         "#,
         payload.user_id,
         payload.address
@@ -192,6 +202,7 @@ pub async fn create_order(
         )
     })?;
 
+    // Фиксируем транзакцию
     tx.commit().await.map_err(|e| {
         error!(error = %e, "Не удалось зафиксировать транзакцию создания заказа");
         (
@@ -207,10 +218,37 @@ pub async fn create_order(
         "Заказ успешно создан"
     );
 
+    // Достаем список админов для уведомлений
+    let admin_records = sqlx::query!("SELECT telegram_id FROM admins WHERE is_active = true")
+        .fetch_all(&pool)
+        .await
+        .unwrap_or_default();
+
+    let admin_tg_ids: Vec<i64> = admin_records.into_iter().map(|a| a.telegram_id).collect();
+
+    // Формируем список товаров для ответа из того, что вытащили из корзины ранее
+    let response_items: Vec<OrderItemResponse> = cart_items
+        .into_iter()
+        .map(|item| OrderItemResponse {
+            product_id: item.product_id,
+            name: item.name,
+            quantity: item.quantity,
+            price_at_purchase: item.price,
+        })
+        .collect();
+
     Ok(Json(CreateOrderResponse {
         status: "success".to_string(),
         order_id,
         total_price,
+        delivery_type: payload.delivery_type,
+        address: payload.address,
+        user_name: payload.user_name,
+        phone_number: payload.phone_number,
+        payment_method: payload.payment_method,
+        created_at,
+        admin_tg_ids,
+        items: response_items,
     }))
 }
 
@@ -335,103 +373,6 @@ pub async fn get_order_detail(
         phone_number: order.phone_number,
         total_price: order.total_price,
         created_at: order.created_at.unwrap_or_default(),
-        items,
-    }))
-}
-
-/// POST /api/v1/internal/new-order-notification
-#[instrument(skip(pool))]
-pub async fn internal_new_order_notification(
-    State(pool): State<PgPool>,
-    Json(payload): Json<NewOrderNotificationRequest>,
-) -> Result<Json<NewOrderNotificationResponse>, (StatusCode, String)> {
-    let order_record = sqlx::query!(
-        r#"
-        SELECT 
-            id AS order_id, 
-            delivery_type, 
-            address, 
-            user_name, 
-            phone_number, 
-            payment_method, 
-            total_price, 
-            COALESCE(to_char(created_at, 'YYYY-MM-DD"T"HH24:MI:SS"Z"'), '') AS created_at
-        FROM orders
-        WHERE id = $1
-        "#,
-        payload.order_id
-    )
-    .fetch_optional(&pool)
-    .await
-    .map_err(|e| {
-        error!(order_id = payload.order_id, error = %e, "Не удалось получить данные заказа для уведомления");
-        (StatusCode::INTERNAL_SERVER_ERROR, "Внутренняя ошибка сервера".to_string())
-    })?;
-
-    let order = match order_record {
-        Some(rec) => rec,
-        None => return Err((StatusCode::NOT_FOUND, "Заказ не найден".to_string())),
-    };
-
-    let admin_records = sqlx::query!(
-        r#"
-        SELECT telegram_id
-        FROM admins
-        WHERE is_active = true
-        "#
-    )
-    .fetch_all(&pool)
-    .await
-    .map_err(|e| {
-        error!(error = %e, "Не удалось получить список администраторов");
-        (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            "Внутренняя ошибка сервера".to_string(),
-        )
-    })?;
-
-    let admin_tg_ids = admin_records.into_iter().map(|a| a.telegram_id).collect();
-
-    let items_records = sqlx::query!(
-        r#"
-        SELECT 
-            product_id, 
-            name, 
-            quantity, 
-            price_at_purchase
-        FROM order_items
-        WHERE order_id = $1
-        ORDER BY id ASC
-        "#,
-        payload.order_id
-    )
-    .fetch_all(&pool)
-    .await
-    .map_err(|e| {
-        error!(order_id = payload.order_id, error = %e, "Не удалось получить позиции заказа для уведомления");
-        (StatusCode::INTERNAL_SERVER_ERROR, "Внутренняя ошибка сервера".to_string())
-    })?;
-
-    let items = items_records
-        .into_iter()
-        .map(|item| OrderItemResponse {
-            product_id: item.product_id,
-            name: item.name,
-            quantity: item.quantity,
-            price_at_purchase: item.price_at_purchase,
-        })
-        .collect();
-
-    Ok(Json(NewOrderNotificationResponse {
-        order_id: order.order_id,
-        delivery_type: order.delivery_type,
-        address: order.address,
-        user_name: order.user_name,
-        phone_number: order.phone_number,
-        payment_method: order.payment_method,
-        total_price: order.total_price,
-        created_at: order.created_at.unwrap_or_default(),
-        admin_tg_ids,
         items,
     }))
 }
