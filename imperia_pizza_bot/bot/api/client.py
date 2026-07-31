@@ -39,6 +39,17 @@ async def post(path: str, data: dict, headers: dict | None = None) -> dict | Non
     return None
 
 
+async def patch(path: str, data: dict, headers: dict | None = None) -> dict | None:
+    try:
+        async with get_session().patch(path, json=data, headers=headers) as r:
+            if r.ok:
+                return await r.json()
+            print(f"[API PATCH] Неожиданный статус {r.status} для {path}")
+    except aiohttp.ClientError as e:
+        print(f"[API PATCH] Ошибка {path}: {e}")
+    return ModuleNotFoundError
+
+
 async def delete(path: str, params: dict | None = None, headers: dict | None = None) -> dict | None:
     try:
         async with get_session().delete(path, params=params, headers=headers) as r:

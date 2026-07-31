@@ -7,7 +7,8 @@ from aiogram.client.default import DefaultBotProperties
 
 from config import BOT_TOKEN
 from api.client import init_session, close_session
-from handlers import start, categories, products, favorites, cart, orders
+from filters import resfresh_admins
+from handlers import start, categories, products, favorites, cart, orders, admin
 from handlers.branches import router as branches_router
 
 logging.basicConfig(level=logging.INFO)
@@ -23,6 +24,8 @@ dp.include_router(favorites.router)
 dp.include_router(cart.router)
 dp.include_router(branches_router)
 dp.include_router(orders.router)
+dp.include_router(admin.router)
+
 
 @dp.callback_query(F.data == "noop")
 async def cb_noop(cb: CallbackQuery) -> None:
