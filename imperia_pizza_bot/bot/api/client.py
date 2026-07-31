@@ -1,5 +1,5 @@
 import aiohttp
-from config import API_BASE
+from config import API_BASE, BOT_SECRET
 
 _session: aiohttp.ClientSession | None = None
 
@@ -10,12 +10,21 @@ def get_session() -> aiohttp.ClientSession:
 
 async def init_session() -> None:
     global _session
-    _session = aiohttp.ClientSession(base_url=API_BASE)
+    if _session is None or _session.closed:
+        headers = {
+            "X-Bot-Secret": BOT_SECRET
+        }
+        _session = aiohttp.ClientSession(
+            base_url=API_BASE,
+            headers=headers, 
+            timeout=aiohttp.ClientTimeout(total=10),
+        )
 
 async def close_session() -> None:
     global _session
     if _session and not _session.closed:
         await _session.close()
+        _session = None
 
 
 async def get(path: str, params: dict | None = None, headers: dict | None = None) -> dict | list | None:
