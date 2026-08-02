@@ -4,9 +4,9 @@ from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.types import Message, CallbackQuery
  
-from api.admin import get_active_orders, update_order_status
+from api.admin import get_active_orders, update_order_status, ban_user
 from filters import IsAdmin
-from keyboards.admin import kb_orders_list, kb_order_detail, STATUS_LABELS
+from keyboards.admin import kb_orders_list, kb_order_detail, kb_ban_confirm, STATUS_LABELS
 from formatting import format_datetime
  
 router = Router()
@@ -104,7 +104,7 @@ async def cb_admin_order_detail(cb: CallbackQuery) -> None:
     )
 
 
-@router.callback_query(F.data.startswith("admin_order_status_"))
+@router.callback_query(F.data.startswith("admin_status_"))
 async def cb_admin_order_status(cb: CallbackQuery) -> None:
     _, _, order_id_raw, new_status = cb.data.split("_")
     order_id = int(order_id_raw)
@@ -124,6 +124,70 @@ async def cb_admin_order_status(cb: CallbackQuery) -> None:
     if order is None:
         return
  
+    await cb.message.edit_text(
+        build_order_detail_text(order),
+        reply_markup=kb_order_detail(order_id, order["status"]),
+        parse_mode="HTML",
+    )
+
+
+@router.callback_query(F.data.startswith("admin_ban_ask_"))
+async def cb_admin_ban_ask(cb: CallbackQuery) -> None:
+    order_id = int(cb.data.split("_")[3])
+    await cb.answer()
+    await cb.message.edit_text(
+        f" Забанить клиента? Он больше не сможет оформлять заказы.",
+        reply_markup=kb_ban_confirm(order_id),
+    )
+
+
+@router.callback_query(F.data.startswith("admin_ban_no"))
+async def cb_admin_ban_no(cb: CallbackQuery) -> None:
+    order_id = int(cb.data.split("_")[3])
+    await cb.answer("Отменено")
+
+    orders = await get_active_orders()
+    order = _find_order(orders or [], order_id)
+
+    if order is None:
+        return
+
+    await cb.message.edit_text(
+        build_order_detail_text(order),
+        reply_markup=kb_order_detail(order_id, order["status"]),
+        parse_mode="HTML",
+    )
+
+
+@router.callback_query(F.data.startswith("admin_ban_yes"))
+async def cb_admin_ban_yes(cb: CallbackQuery) -> None:
+    order_id = int(cb.data.split("_")[3])
+    
+    orders = await get_active_orders()
+    order = _find_order(orders or [], order_id)
+
+    if order is None:
+        await cb.aswer("Заказ не найден.", show_alert=True)
+        return
+
+    customer_tg_id = order.get("customer_telegram_id")
+    if not customer_tg_id:
+        await cb.answer("Клиент не нашелся.", show_alert=True)
+        return
+
+    result = await ban_user(
+        admin_tg_id=cb.from_user.id,
+        user_id=customer_tg_id,
+        phone_number=order.get("phone_number"),
+        ban_reason="Забанен администратором",
+    )
+
+    if not result or result.get("status") != "success":
+        await cb.answer("Не удалось забанить клиента.", show_alert=True)
+        return
+
+    logger.info("Admin %s banned user %s (order %s)", cb.from_user.id, customer_tg_id, order_id)
+    await cb.answer("Клиент забанен 🚫")
     await cb.message.edit_text(
         build_order_detail_text(order),
         reply_markup=kb_order_detail(order_id, order["status"]),

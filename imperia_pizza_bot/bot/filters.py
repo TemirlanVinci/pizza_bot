@@ -20,7 +20,7 @@ async def refresh_admins() -> None:
             for admin in data["admins"]
             if admin.get("is_active")
         }
-    _last_refresh = time.altzone
+    _last_refresh = time.monotonic()
 
 
 async def _ensure_fresh() -> None:

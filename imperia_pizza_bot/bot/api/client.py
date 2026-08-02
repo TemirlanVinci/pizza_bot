@@ -56,7 +56,7 @@ async def patch(path: str, data: dict, headers: dict | None = None) -> dict | No
             print(f"[API PATCH] Неожиданный статус {r.status} для {path}")
     except aiohttp.ClientError as e:
         print(f"[API PATCH] Ошибка {path}: {e}")
-    return ModuleNotFoundError
+    return None
 
 
 async def delete(path: str, params: dict | None = None, headers: dict | None = None) -> dict | None:
