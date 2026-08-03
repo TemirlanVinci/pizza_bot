@@ -41,6 +41,7 @@ def build_orders_list_text(orders: list[dict]) -> str:
 def build_order_detail_text(order: dict) -> str:
     status_label = STATUS_LABELS.get(order["status"], order["status"])
     delivery_label = DELIVERY_LABELS.get(order["delivery_type"], order["delivery_type"])
+    is_pickup = order.get("delivery_type") == "pickup"
 
     lines = [
         f"<b>Заказ #{order['order_id']}</b>",
@@ -48,8 +49,21 @@ def build_order_detail_text(order: dict) -> str:
         f"Тип {delivery_label}",
     ]
 
-    if order.get("delivery_type") == "delivery" and order.get("address"):
-        lines.append(f"📍 Адрес: {order['address']}")
+    if order.get("user_name"):
+        lines.append(f"👤 Клиент: {order['user_name']}")
+
+    if order.get("address"):
+        address_caption = "Точка самовывоза" if is_pickup else "📍 Адрес"
+        lines.append(f"{address_caption}: {order['address']}")
+
+    items = order.get("items") or []
+    if items:
+        lines.append("<b>Состав заказа:</b>")
+        for item in items:
+            lines.append(
+                f"• {item['name']} × {item['quantity']} — {item['price_at_purchase']} c"
+            )
+            lines.append("")
 
     lines.append(f"📞 Телефон: {order['phone_number']}")
     lines.append(f"💰 Сумма: <b>{order['total_price']} с</b>")
