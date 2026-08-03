@@ -91,7 +91,10 @@ async fn test_create_and_get_product(pool: PgPool) {
 
     response.assert_status_ok();
     let products: Vec<Product> = response.json();
-    let created_product = products.iter().find(|p| p.id == 99999).expect("Created product with ID 99999 not found");
+    let created_product = products
+        .iter()
+        .find(|p| p.id == 99999)
+        .expect("Created product with ID 99999 not found");
     assert_eq!(created_product.name, "Margarita");
     assert_eq!(created_product.price, 450);
 

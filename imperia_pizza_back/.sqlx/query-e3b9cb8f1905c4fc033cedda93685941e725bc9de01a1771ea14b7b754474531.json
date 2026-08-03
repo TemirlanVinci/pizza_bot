@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        SELECT telegram_id\n        FROM users\n        ORDER BY id ASC\n        ",
+  "query": "\n        SELECT telegram_id\n        FROM users\n        ORDER BY id ASC\n",
   "describe": {
     "columns": [
       {
@@ -22,5 +22,5 @@
       false
     ]
   },
-  "hash": "a7bd61e4134ce8744263648b7071e936e4d26f75b3688c04ea01895c8d66e43f"
+  "hash": "e3b9cb8f1905c4fc033cedda93685941e725bc9de01a1771ea14b7b754474531"
 }

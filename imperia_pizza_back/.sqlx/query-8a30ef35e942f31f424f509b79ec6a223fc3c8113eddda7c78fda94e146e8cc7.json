@@ -1,0 +1,124 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT\n            o.id AS order_id,\n            o.status,\n            o.delivery_type,\n            o.address,\n            o.phone_number,\n            o.user_id,\n            o.user_name,\n            o.total_price,\n            COALESCE(to_char(o.created_at, 'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"'), '') AS created_at,\n            COALESCE(\n                json_agg(\n                    json_build_object(\n                        'product_id', oi.product_id,\n                        'name', oi.name,\n                        'quantity', oi.quantity,\n                        'price_at_purchase', oi.price_at_purchase\n                    ) ORDER BY oi.id\n                ) FILTER (WHERE oi.id IS NOT NULL),\n                '[]'\n            ) AS \"items!: sqlx::types::Json<Vec<OrderItemResponse>>\"\n        FROM orders o\n        LEFT JOIN order_items oi ON oi.order_id = o.id\n        WHERE o.status NOT IN ('completed', 'cancelled')\n        GROUP BY o.id\n        ORDER BY o.created_at DESC\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "order_id",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "orders",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "status",
+        "type_info": "Varchar",
+        "origin": {
+          "Table": {
+            "table": "orders",
+            "name": "status"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "delivery_type",
+        "type_info": "Varchar",
+        "origin": {
+          "Table": {
+            "table": "orders",
+            "name": "delivery_type"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "address",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "orders",
+            "name": "address"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "phone_number",
+        "type_info": "Varchar",
+        "origin": {
+          "Table": {
+            "table": "orders",
+            "name": "phone_number"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "user_id",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "orders",
+            "name": "user_id"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "user_name",
+        "type_info": "Varchar",
+        "origin": {
+          "Table": {
+            "table": "orders",
+            "name": "user_name"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "total_price",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "orders",
+            "name": "total_price"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "created_at",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 9,
+        "name": "items!: sqlx::types::Json<Vec<OrderItemResponse>>",
+        "type_info": "Json",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      null,
+      null
+    ]
+  },
+  "hash": "8a30ef35e942f31f424f509b79ec6a223fc3c8113eddda7c78fda94e146e8cc7"
+}

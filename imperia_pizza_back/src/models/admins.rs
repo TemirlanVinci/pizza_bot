@@ -41,15 +41,28 @@ pub struct StatusSuccessResponse {
     pub status: String,
 }
 
-#[derive(Debug, Serialize, sqlx::FromRow)]
+/// Позиция заказа. Декодируется из JSON-агрегата (json_agg/json_build_object),
+/// который собирает Postgres, поэтому нужен Deserialize, а не FromRow.
+#[derive(Debug, Serialize, Deserialize)]
+pub struct OrderItemResponse {
+    pub product_id: Option<i32>, // order_items.product_id не NOT NULL в схеме
+    pub name: String,
+    pub quantity: i32,
+    pub price_at_purchase: i32,
+}
+
+#[derive(Debug, Serialize)]
 pub struct ActiveOrderResponse {
     pub order_id: i32,
     pub status: String,
     pub delivery_type: String,
     pub address: String,
     pub phone_number: String,
+    pub user_id: i64,
+    pub user_name: String,
     pub total_price: i32,
     pub created_at: String,
+    pub items: Vec<OrderItemResponse>,
 }
 
 #[derive(Debug, Serialize)]
