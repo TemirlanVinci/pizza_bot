@@ -27,12 +27,19 @@ async fn main() {
 
     // Пул соединений с БД
     let pool = PgPoolOptions::new()
-        .max_connections(5)
+        .max_connections(50)
         .connect(&database_url)
         .await
         .expect("Не удалось подключиться к базе данных");
 
     info!("✅ Успешное подключение к PostgreSQL!");
+
+    // ---> ДОБАВИТЬ ВОТ ЭТОТ БЛОК <---
+    sqlx::migrate!()
+        .run(&pool)
+        .await
+        .expect("Ошибка при выполнении миграций базы данных");
+    info!("✅ Миграции успешно применены!");
 
     // Настраиваем CORS для беспроблемной работы с фронтендом/TWA
     let cors = CorsLayer::new()
@@ -46,7 +53,13 @@ async fn main() {
         .layer(TraceLayer::new_for_http());
 
     // Запуск сервера
-    let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
+    let port: u16 = env::var("PORT")
+        .ok()
+        .and_then(|p| p.parse().ok())
+        .unwrap_or(8080);
+
+    // Используем [0, 0, 0, 0] вместо [127, 0, 0, 1] для работы в Docker
+    let addr = SocketAddr::from(([0, 0, 0, 0], port));
     info!("🚀 Запуск сервера на http://{}", addr);
 
     let listener = TcpListener::bind(addr).await.unwrap();

@@ -1,0 +1,65 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: pizza_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-pizza_db}
+    ports:
+      - "5433:5433"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-pizza_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  backend:
+    build:
+      context: ./imperia_pizza_back
+      dockerfile: Dockerfile
+    container_name: pizza_backend
+    restart: always
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-pizza_db}
+      PORT: 8080
+      BOT_SECRET: ${BOT_SECRET}  # <--- Добавить эту строку!
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  bot:
+    build:
+      context: ./imperia_pizza_bot
+      dockerfile: Dockerfile
+    container_name: pizza_bot
+    restart: always
+    environment:
+      BOT_TOKEN: ${BOT_TOKEN}
+      BACKEND_URL: http://backend:8080
+      BOT_SECRET: ${BOT_SECRET}  # <--- И добавить эту строку!
+    depends_on:
+      - backend
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+volumes:
+  postgres_data:
