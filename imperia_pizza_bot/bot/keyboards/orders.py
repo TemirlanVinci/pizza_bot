@@ -25,7 +25,7 @@ STATUS_LABELS = {
 
 def _fmt_date(iso: str | None) -> str:
     if not iso:
-        return "-"
+        return "—"
     try:
         dt = datetime.fromisoformat(iso)
         return dt.strftime("%d.%m")
@@ -41,12 +41,17 @@ def _order_button_text(o: dict) -> str:
     
     return f"{circle} #{oid} от {date} — {price} сом"
 
+
 def kb_delivery_type() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text="🚚 Доставка", callback_data="order_dtype_delivery"),
-            InlineKeyboardButton(text="🏠 Самовывоз", callback_data="order_dtype_pickup")],
-            [InlineKeyboardButton(text=" Отменить оформление", callback_data="order_cancel")] # Добавить эмодзи
+            [
+                InlineKeyboardButton(text="🚚 Доставка", callback_data="order_dtype_delivery"),
+                InlineKeyboardButton(text="🏠 Самовывоз", callback_data="order_dtype_pickup")
+            ],
+            [
+                InlineKeyboardButton(text="❌ Отменить оформление", callback_data="order_cancel")
+            ]
         ]
     )
 
@@ -74,6 +79,10 @@ def kb_pickup_branches(branches: list, offset: int = 0) -> InlineKeyboardMarkup:
                 callback_data=f"order_pickbr_{b_id}"
             )
         ])
+    
+    rows.append([
+        InlineKeyboardButton(text="❌ Отменить", callback_data="order_cancel")
+    ])
 
     return InlineKeyboardMarkup(inline_keyboard=rows)
 
@@ -81,7 +90,7 @@ def kb_pickup_branches(branches: list, offset: int = 0) -> InlineKeyboardMarkup:
 def kb_cancel_order() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text="Отменить оформление", callback_data="order_cancel")]
+            [InlineKeyboardButton(text="❌ Отменить оформление", callback_data="order_cancel")]
         ]
     )
 
@@ -89,7 +98,7 @@ def kb_cancel_order() -> InlineKeyboardMarkup:
 def kb_request_contact() -> ReplyKeyboardMarkup:
     return ReplyKeyboardMarkup(
         keyboard=[
-            [KeyboardButton(text="Отправить мой номер", request_contact=True)]
+            [KeyboardButton(text="📱 Отправить мой номер", request_contact=True)]
         ],
         resize_keyboard=True,
         one_time_keyboard=True,
@@ -99,9 +108,13 @@ def kb_request_contact() -> ReplyKeyboardMarkup:
 def kb_payment_method() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text="💸 Наличными", callback_data="order_pay_cash"),
-            InlineKeyboardButton(text="💳 Visa курьеру", callback_data="order_pay_visa_courier")],
-            [InlineKeyboardButton(text="🏠 Самовывоз", callback_data="order_cancel")]
+            [
+                InlineKeyboardButton(text="💵 Наличными", callback_data="order_pay_cash"),
+                InlineKeyboardButton(text="💳 Visa курьеру", callback_data="order_pay_visa_courier")
+            ],
+            [
+                InlineKeyboardButton(text="❌ Отменить оформление", callback_data="order_cancel")
+            ]
         ]
     )
 
@@ -109,8 +122,8 @@ def kb_payment_method() -> InlineKeyboardMarkup:
 def kb_confirm_order() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text="  Подтвердить заказ", callback_data="order_confirm")],
-            [InlineKeyboardButton(text="  Отменить оформление", callback_data="order_cancel")]
+            [InlineKeyboardButton(text="✅ Подтвердить заказ", callback_data="order_confirm")],
+            [InlineKeyboardButton(text="❌ Отменить оформление", callback_data="order_cancel")]
         ]
     )
 
@@ -118,8 +131,10 @@ def kb_confirm_order() -> InlineKeyboardMarkup:
 def kb_after_order() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text=" Мои заказы", callback_data="orders_list"),
-            InlineKeyboardButton(text="🏠 Главная", callback_data="home")]
+            [
+                InlineKeyboardButton(text="📦 Мои заказы", callback_data="orders_list"),
+                InlineKeyboardButton(text="🏠 Главная", callback_data="home")
+            ]
         ]
     )
 
@@ -142,7 +157,9 @@ def kb_orders_list(orders: list) -> InlineKeyboardMarkup:
 def kb_order_detail() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text=" К списку заказов", callback_data="orders_list"),
-            InlineKeyboardButton(text="🏠 Главная", callback_data="home")]
+            [
+                InlineKeyboardButton(text="⬅️ К списку заказов", callback_data="orders_list"),
+                InlineKeyboardButton(text="🏠 Главная", callback_data="home")
+            ]
         ]
     )

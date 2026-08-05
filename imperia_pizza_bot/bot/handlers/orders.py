@@ -30,8 +30,8 @@ logger = logging.getLogger(__name__)
 PHONE_RE = re.compile(r"^\+?\d{9,15}$")
 
 PAYMENT_LABELS = {
-    "cash": " Наличными",
-    "visa_courier": "Visa курьеру",
+    "cash": "💵 Наличными",
+    "visa_courier": "💳 Visa курьеру",
 }
 
 
@@ -69,7 +69,7 @@ async def cb_checkout(cb: CallbackQuery, state: FSMContext) -> None:
     await cb.answer()
     await render(
         cb,
-        "<b>Оформление заказа</b>\n\nВыберите способ получения:",
+        "📦 <b>Оформление заказа</b>\n\nВыберите способ получения:",
         kb_delivery_type(),
     )
 
@@ -83,10 +83,10 @@ async def cb_order_cancel(cb: CallbackQuery, state: FSMContext) -> None:
     except Exception:
         pass
     await cb.message.answer(
-        "Оформление заказа отменено. Корзина сохранена.",
+        "❌ Оформление заказа отменено. Корзина сохранена.",
         reply_markup=ReplyKeyboardRemove(),
     )
-    await cb.message.answer("🛒 Корзина пуста.", reply_markup=kb_back_menu())
+    await cb.message.answer("🛒 Вы вернулись в главное меню.", reply_markup=kb_back_menu())
 
 
 @router.callback_query(F.data.startswith("order_dtype_"))
@@ -111,7 +111,7 @@ async def cb_order_dtype_(cb: CallbackQuery, state: FSMContext) -> None:
         await cb.answer()
         await render(
             cb,
-            "<b>Самовывоз</b>\n\nВыберите филиал:",
+            "🏠 <b>Самовывоз</b>\n\nВыберите удобный филиал:",
             kb_pickup_branches(branches),
         )
         return
@@ -120,8 +120,8 @@ async def cb_order_dtype_(cb: CallbackQuery, state: FSMContext) -> None:
     await state.set_state(OrderStates.waiting_address)
     await render(
         cb,
-        "<b>Доставка</b>\n\nВведите адрес доставки одним сообщением "
-        "(например: мкр. Восток-5, дом 12. кв. 45)",
+        "🚚 <b>Доставка</b>\n\nВведите адрес доставки одним сообщением\n"
+        "(например: <i>мкр. Восток-5, дом 12, кв. 45</i>):",
         kb_cancel_order(),
     )
 
@@ -143,18 +143,20 @@ async def cb_order_pickbr(cb: CallbackQuery, state: FSMContext) -> None:
 async def msg_order_address(message: Message, state: FSMContext) -> None:
     address = (message.text or "").strip()
     if not address:
-        await message.answer("Пожалйста, отправьте адрес текстом.")
+        await message.answer("Пожалуйста, отправьте адрес текстом.")
         return
 
     await state.update_data(address=address)
     await ask_phone(message, state)
 
+
 async def ask_phone(target: Message, state: FSMContext) -> None:
     await state.set_state(OrderStates.waiting_phone)
     await target.answer(
-        "Отправьте номер телефона для связи - кнопкой ниже или сообщением ,"
-        "(например: +996555123456)",
+        "📞 Отправьте номер телефона для связи — кнопкой ниже или текстом\n"
+        "(например: <i>+996555123456</i>):",
         reply_markup=kb_request_contact(),
+        parse_mode="HTML"
     )
 
 
@@ -162,7 +164,7 @@ async def ask_phone(target: Message, state: FSMContext) -> None:
 async def msg_order_phone_contact(message: Message, state: FSMContext) -> None:
     phone = normalize_phone(message.contact.phone_number)
     if not phone:
-        await message.answer("Некорректный номер телефона. Пожалуйста, отправьте номер в формате +996555123456")
+        await message.answer("❌ Некорректный номер телефона. Пожалуйста, отправьте номер в формате +996555123456")
         return
 
     await proceed_to_payment(message, state, phone)
@@ -171,9 +173,9 @@ async def msg_order_phone_contact(message: Message, state: FSMContext) -> None:
 async def proceed_to_payment(message: Message, state: FSMContext, phone: str) -> None:
     await state.update_data(phone_number=phone)
     await state.set_state(None)
-    await message.answer("Номер принят ", reply_markup=ReplyKeyboardRemove())
+    await message.answer("✅ Номер принят", reply_markup=ReplyKeyboardRemove())
     await message.answer(
-        "Выберите способ оплаты:", 
+        "💳 Выберите способ оплаты:", 
         reply_markup=kb_payment_method()
     )
 
@@ -185,17 +187,18 @@ async def cb_order_payment(cb: CallbackQuery, state: FSMContext) -> None:
      
     data = await state.get_data()
     delivery_type = data.get("delivery_type")
-    address = data.get("address", "-")
-    phone = data.get("phone_number", "-")
+    address = data.get("address", "—")
+    phone = data.get("phone_number", "—")
 
-    delivery_label = "Доставка" if delivery_type == "delivery" else "Самовывоз"
+    delivery_label = "🚚 Доставка" if delivery_type == "delivery" else "🏠 Самовывоз"
 
     text = (
-        f"Подтверждение заказа\n\n"
-        f"Тип доставки: {delivery_label}\n"
-        f"Адрес: {address}\n"
-        f"Телефон: {phone}\n"
-        f"Способ оплаты: {PAYMENT_LABELS.get(payment_method, payment_method)}\n\n"
+        f"📝 <b>Подтверждение заказа</b>\n\n"
+        f"<b>Тип:</b> {delivery_label}\n"
+        f"<b>Адрес:</b> {address}\n"
+        f"<b>Телефон:</b> {phone}\n"
+        f"<b>Оплата:</b> {PAYMENT_LABELS.get(payment_method, payment_method)}\n\n"
+        f"Проверьте данные и подтвердите заказ."
     )
 
     await cb.answer()
@@ -216,10 +219,10 @@ async def cb_order_confirm(cb: CallbackQuery, state: FSMContext) -> None:
         return
 
     payload = {
-        "user_id":cb.from_user.id,
+        "user_id": cb.from_user.id,
         "user_name": cb.from_user.full_name,
         "phone_number": data["phone_number"],
-        "delivery_type": data ["delivery_type"],
+        "delivery_type": data["delivery_type"],
         "address": data["address"],
         "payment_method": data["payment_method"],
     }
@@ -227,16 +230,16 @@ async def cb_order_confirm(cb: CallbackQuery, state: FSMContext) -> None:
     result = await create_order(payload)
 
     if not result or result.get("status") != "success":
-        await cb.answer("Не удалось офрмить заказ. Попробуйте еще раз.", show_alert=True)
+        await cb.answer("Не удалось оформить заказ. Попробуйте еще раз.", show_alert=True)
         return
 
     await state.clear()
-    await cb.answer("Заказ оформлен.")
+    await cb.answer("Заказ оформлен!", show_alert=False)
 
     text = (
-        "<b>Заказ оформлен</b>\n\n"
-        f"Номер заказа: <b>#{result.get('order_id')} с</b>\n\n"
-        "Спасибо за заказ!"
+        "✅ <b>Заказ успешно оформлен!</b>\n\n"
+        f"Номер заказа: <b>#{result.get('order_id')}</b>\n\n"
+        "Спасибо, что выбрали нас!"
     )
 
     await render(cb, text, kb_after_order())
@@ -248,28 +251,28 @@ def build_admin_notification_text(order: dict) -> str:
     delivery_label = "🚚 Доставка" if delivery_type == "delivery" else "🏠 Самовывоз"
 
     lines = [
-        "<b>Новый заказ</b>",
+        "🚨 <b>Новый заказ!</b>",
         delivery_label,
-        f"👤 Клиент: {order.get('user_name', '—')}",
-        f"📞 Телефон: {order.get('phone_number', '—')}",
+        f"👤 <b>Клиент:</b> {order.get('user_name', '—')}",
+        f"📞 <b>Телефон:</b> {order.get('phone_number', '—')}",
     ]
 
     if delivery_type == "delivery":
-        lines.append(f"📍 Адрес: {order.get('address', '—')}")
+        lines.append(f"📍 <b>Адрес:</b> {order.get('address', '—')}")
 
     payment_method = order.get("payment_method")
-    lines.append(f"💳 Оплата: {PAYMENT_LABELS.get(payment_method, payment_method)}")
+    lines.append(f"💳 <b>Оплата:</b> {PAYMENT_LABELS.get(payment_method, payment_method)}")
     lines.append("")
-    lines.append("<b>Состав заказа:</b>")
+    lines.append("🛒 <b>Состав заказа:</b>")
 
     for item in order.get("items", []):
         lines.append(
             f"• {item.get('name')} × {item.get('quantity')} — "
-            f"{item.get('price_at_purchase')} c"
+            f"{item.get('price_at_purchase')} сом"
         )
 
-    lines.append("")
-    lines.append(f"Итого: <b>{order.get('total_price')} c</b>")
+    lines.append("━━━━━━━━━━━━━━━━━━")
+    lines.append(f"💰 Итого: <b>{order.get('total_price')} сом</b>")
 
     return "\n".join(lines)
         
@@ -298,7 +301,7 @@ async def cb_orders_list(cb: CallbackQuery) -> None:
     await cb.answer()
 
     if raw is None:
-        await render(cb, "Нет заказов.", kb_back_menu())
+        await render(cb, "❌ Ошибка загрузки заказов.", kb_back_menu())
         return
     
     orders = raw if isinstance(raw, list) else [raw]
@@ -306,10 +309,12 @@ async def cb_orders_list(cb: CallbackQuery) -> None:
     if not orders:
         await render(
             cb,
-            "<b>У вас пока нет заказов.</b>\n\n",
+            "📦 <b>У вас пока нет заказов.</b>\n\nСделайте свой первый заказ через меню!",
             kb_back_menu(),
         )
-    await render(cb, "<b>Ваши заказы:</b>\n\n", kb_orders_list(orders))
+        return
+
+    await render(cb, "📦 <b>Ваши заказы:</b>\n\nВыберите заказ для подробностей:", kb_orders_list(orders))
 
 
 @router.callback_query(F.data.startswith("order_detail_") | F.data.startswith("order_details_"))
@@ -319,32 +324,31 @@ async def cb_order_detail(cb: CallbackQuery) -> None:
     await cb.answer()
 
     if not order:
-        await render(cb, "Не удалось загрузить заказ.", kb_order_detail())
+        await render(cb, "❌ Не удалось загрузить заказ.", kb_order_detail())
         return
 
-    status = STATUS_LABELS.get(order.get("status"), order.get("status", "-"))
+    status = STATUS_LABELS.get(order.get("status"), order.get("status", "—"))
     delivery_type = order.get("delivery_type")
-    delivery_label = "Доставка" if delivery_type == "delivery" else "Самовывоз"
+    delivery_label = "🚚 Доставка" if delivery_type == "delivery" else "🏠 Самовывоз"
 
     lines = [
         f"🧾 <b>Заказ #{order.get('order_id')}</b>",
-        f"Статус: {status}",
-        f"{delivery_label}",
-        f"📍 Адрес: {order.get('address', '—')}",
-        f"📞 Телефон: {order.get('phone_number', '—')}",
-        f"🕒 Создан: {order.get('created_at', '—')}",
+        f"<b>Статус:</b> {status}",
+        f"<b>Тип:</b> {delivery_label}",
+        f"📍 <b>Адрес:</b> {order.get('address', '—')}",
+        f"📞 <b>Телефон:</b> {order.get('phone_number', '—')}",
+        f"🕒 <b>Создан:</b> {order.get('created_at', '—')}",
         "",
-        "<b>Состав заказа:</b>",
+        "🛒 <b>Состав заказа:</b>",
     ]
  
     for item in order.get("items", []):
         lines.append(
             f"• {item.get('name')} × {item.get('quantity')} — "
-            f"{item.get('price_at_purchase')} c"
+            f"{item.get('price_at_purchase')} сом"
         )
  
-    lines.append("")
-    lines.append(f"Итого: <b>{order.get('total_price')} c</b>")
+    lines.append("━━━━━━━━━━━━━━━━━━")
+    lines.append(f"💰 Итого: <b>{order.get('total_price')} сом</b>")
  
     await render(cb, "\n".join(lines), kb_order_detail())
-

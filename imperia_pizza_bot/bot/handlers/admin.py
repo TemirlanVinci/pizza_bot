@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 DELIVERY_LABELS = {
     "delivery": "🚚 Доставка",
-    "pickup": "Самовывоз",
+    "pickup": "🏠 Самовывоз",
 }
 
 
@@ -30,11 +30,11 @@ def _find_order(orders: list[dict], order_id: int) -> dict | None:
 
 def build_orders_list_text(orders: list[dict]) -> str:
     if not orders:
-        return "<b>Активные заказы</b>\n\n Сейчас активных заказов нет."
+        return "🛡 <b>Активные заказы</b>\n\nСейчас активных заказов нет."
     return (
-        f"<b>Активные заказы:</b>\n\n"
-        f"Всего: <b>{len(orders)}</b>\n\n"
-        f"Выберите заказ для просмотра:"
+        f"🛡 <b>Активные заказы:</b>\n\n"
+        f"Всего в работе: <b>{len(orders)}</b>\n\n"
+        f"Выберите заказ для управления:"
     )
 
 
@@ -44,30 +44,29 @@ def build_order_detail_text(order: dict) -> str:
     is_pickup = order.get("delivery_type") == "pickup"
 
     lines = [
-        f"<b>Заказ #{order['order_id']}</b>",
-        f"Статус: {status_label}",
-        f"Тип {delivery_label}",
+        f"🧾 <b>Заказ #{order['order_id']}</b>",
+        f"<b>Статус:</b> {status_label}",
+        f"<b>Тип:</b> {delivery_label}",
     ]
 
     if order.get("user_name"):
-        lines.append(f"👤 Клиент: {order['user_name']}")
+        lines.append(f"👤 <b>Клиент:</b> {order['user_name']}")
 
     if order.get("address"):
-        address_caption = "Точка самовывоза" if is_pickup else "📍 Адрес"
+        address_caption = "📍 Точка самовывоза" if is_pickup else "📍 Адрес"
         lines.append(f"{address_caption}: {order['address']}")
 
     items = order.get("items") or []
     if items:
-        lines.append("<b>Состав заказа:</b>")
+        lines.append("\n🛒 <b>Состав заказа:</b>")
         for item in items:
             lines.append(
-                f"• {item['name']} × {item['quantity']} — {item['price_at_purchase']} c"
+                f"• {item['name']} × {item['quantity']} — {item['price_at_purchase']} сом"
             )
-            lines.append("")
 
-    lines.append(f"📞 Телефон: {order['phone_number']}")
-    lines.append(f"💰 Сумма: <b>{order['total_price']} с</b>")
-    lines.append(f"🕒 Создан: {format_datetime(order['created_at'])}")
+    lines.append(f"\n📞 <b>Телефон:</b> {order['phone_number']}")
+    lines.append(f"💰 <b>Сумма:</b> <b>{order['total_price']} сом</b>")
+    lines.append(f"🕒 <b>Создан:</b> {format_datetime(order['created_at'])}")
 
     return "\n".join(lines)
 
@@ -107,7 +106,7 @@ async def cb_admin_order_detail(cb: CallbackQuery) -> None:
     order = _find_order(orders or [], order_id)
 
     if order is None:
-        await cb.answer("Заказ не найден или уже неактивен.", show_alert=True)
+        await cb.answer("Заказ не найден или уже завершен.", show_alert=True)
         return
 
     await cb.answer()
@@ -150,7 +149,7 @@ async def cb_admin_ban_ask(cb: CallbackQuery) -> None:
     order_id = int(cb.data.split("_")[3])
     await cb.answer()
     await cb.message.edit_text(
-        f" Забанить клиента? Он больше не сможет оформлять заказы.",
+        f"⚠️ Вы уверены, что хотите забанить клиента?\nОн больше не сможет оформлять заказы.",
         reply_markup=kb_ban_confirm(order_id),
     )
 
@@ -158,7 +157,7 @@ async def cb_admin_ban_ask(cb: CallbackQuery) -> None:
 @router.callback_query(F.data.startswith("admin_ban_no"))
 async def cb_admin_ban_no(cb: CallbackQuery) -> None:
     order_id = int(cb.data.split("_")[3])
-    await cb.answer("Отменено")
+    await cb.answer("Отменено", show_alert=False)
 
     orders = await get_active_orders()
     order = _find_order(orders or [], order_id)
@@ -181,12 +180,12 @@ async def cb_admin_ban_yes(cb: CallbackQuery) -> None:
     order = _find_order(orders or [], order_id)
 
     if order is None:
-        await cb.aswer("Заказ не найден.", show_alert=True)
+        await cb.answer("Заказ не найден.", show_alert=True)
         return
 
     customer_tg_id = order.get("customer_telegram_id")
     if not customer_tg_id:
-        await cb.answer("Клиент не нашелся.", show_alert=True)
+        await cb.answer("Клиент не найден.", show_alert=True)
         return
 
     result = await ban_user(
@@ -201,7 +200,7 @@ async def cb_admin_ban_yes(cb: CallbackQuery) -> None:
         return
 
     logger.info("Admin %s banned user %s (order %s)", cb.from_user.id, customer_tg_id, order_id)
-    await cb.answer("Клиент забанен 🚫")
+    await cb.answer("🚫 Клиент успешно забанен")
     await cb.message.edit_text(
         build_order_detail_text(order),
         reply_markup=kb_order_detail(order_id, order["status"]),

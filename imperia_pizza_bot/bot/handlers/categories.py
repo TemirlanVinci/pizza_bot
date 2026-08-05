@@ -18,15 +18,16 @@ async def show_menu(cb: CallbackQuery, offset: int = 0) -> None:
         try:
             if cb.message.photo:
                 await cb.message.delete()
-                await cb.message.answer(caption="Не удалось загрузить меню. Попробуйте позже.", reply_markup=kb_back_menu())
+                await cb.message.answer(caption="❌ Не удалось загрузить меню. Попробуйте позже.", reply_markup=kb_back_menu())
             else:
-                await cb.message.edit_text("Не удалось загрузить меню. Попробуйте позже.", reply_markup=kb_back_menu())
+                await cb.message.edit_text("❌ Не удалось загрузить меню. Попробуйте позже.", reply_markup=kb_back_menu())
         except TelegramBadRequest as e:
             if "message is not modified" in e.message:
                 await cb.answer()
         return
 
-    text = "<b>Меню</b>\n\nВыберите категорию:"
+    # UI-правка: Сделали заголовок визуально приятнее
+    text = "📖 <b>Меню</b>\n\nВыберите нужную категорию, чтобы посмотреть блюда:"
     reply_markup = kb_categories(categories, offset)
 
     try:
@@ -46,14 +47,13 @@ async def show_menu(cb: CallbackQuery, offset: int = 0) -> None:
         else:
             raise e
         
-# МЕНЮ 
+
 @router.callback_query(F.data == "menu")
 async def cb_menu(cb: CallbackQuery) -> None:
     await cb.answer()
     await show_menu(cb, offset=0)
 
 
-# КОНКРЕТНАЯ КАТЕГОРИЯ
 @router.callback_query(F.data.startswith("menu_"))
 async def cb_menu_page(cb: CallbackQuery) -> None:
     offset = int(cb.data.split("_")[1])
@@ -61,7 +61,6 @@ async def cb_menu_page(cb: CallbackQuery) -> None:
     await show_menu(cb, offset=offset)
 
 
-# ТОВАР
 @router.callback_query(F.data.startswith("cat_"))
 async def cb_category(cb: CallbackQuery) -> None:
     parts = cb.data.split("_")
@@ -73,9 +72,9 @@ async def cb_category(cb: CallbackQuery) -> None:
     
     if not products:
         if cb.message.photo:
-            await cb.message.edit_caption(caption="Не удалось загрузить товары. Попробуйте позже.", reply_markup=kb_back_menu())
+            await cb.message.edit_caption(caption="❌ Не удалось загрузить товары. Попробуйте позже.", reply_markup=kb_back_menu())
         else:
-            await cb.message.edit_text("Не удалось загрузить товары. Попробуйте позже.", reply_markup=kb_back_menu())
+            await cb.message.edit_text("❌ Не удалось загрузить товары. Попробуйте позже.", reply_markup=kb_back_menu())
         return
 
     cats = await get_categories()
@@ -87,12 +86,11 @@ async def cb_category(cb: CallbackQuery) -> None:
         "Категория"
     )
     has_next = len(products) == PRODUCTS_LIMIT
-    page = offset // PRODUCTS_LIMIT + 1
-
-    text = f"<b>{cat_name}</b> - стр. {page}\n\nВыберите товар:"
+    
+    # UI-правка: Убрали дублирование "стр. X" в тексте и добавили призыв к действию
+    text = f"🍕 <b>{cat_name}</b>\n\nВыберите блюдо для просмотра подробностей и добавления в корзину:"
     reply_markup = kb_products(products, cat_id, offset, has_next)
 
-    # ПРОВЕРКА: Если открываем список товаров, а прошлое сообщение было с фото
     if cb.message.photo:
         await cb.message.edit_caption(caption=text, reply_markup=reply_markup)
     else:

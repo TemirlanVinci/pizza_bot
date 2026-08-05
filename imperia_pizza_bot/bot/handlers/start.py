@@ -10,7 +10,10 @@ router = Router()
 
 
 async def show_home(target: Message | CallbackQuery) -> None:
-    text = "<b>Империя Пиццы</b>\n\nДобро пожаловать!\n\nВыберите раздел:"
+    text = (
+        "🍕 <b>Империя Пиццы</b>\n\n"
+        "Привет! Выберите нужный раздел ниже, чтобы оформить заказ или проверить его статус:"
+    )
     
     if isinstance(target, CallbackQuery):
         

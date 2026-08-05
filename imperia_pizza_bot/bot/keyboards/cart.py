@@ -7,8 +7,9 @@ def kb_cart(items: list) -> InlineKeyboardMarkup:
     for item in items:
         pid = item['product_id']
         
+        # Убрали лишние эмодзи в названии товара для читаемости
         builder.row(InlineKeyboardButton(
-            text=f"🛍️ {item['name']} — {item['price']} c", 
+            text=f"{item['name']} — {item['price']} сом", 
             callback_data=f"prod_view_{pid}"
         ))
 
@@ -19,7 +20,13 @@ def kb_cart(items: list) -> InlineKeyboardMarkup:
             InlineKeyboardButton(text="🗑️", callback_data=f"cart_del_{pid}")
         )
     
-    builder.row(InlineKeyboardButton(text="📱 Оформить заказ", callback_data="cart_checkout"))
-    builder.row(InlineKeyboardButton(text="🏠 Главная", callback_data="home"))
+    # Сделали акцент на кнопке оформления заказа
+    builder.row(InlineKeyboardButton(text="✅ Оформить заказ", callback_data="cart_checkout"))
+    
+    # Дали возможность быстро вернуться к меню
+    builder.row(
+        InlineKeyboardButton(text="🍽 К меню", callback_data="menu"),
+        InlineKeyboardButton(text="🏠 Главная", callback_data="home")
+    )
     
     return builder.as_markup()

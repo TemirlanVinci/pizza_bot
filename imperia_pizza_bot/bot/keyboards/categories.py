@@ -44,14 +44,19 @@ def kb_categories(categories: list | dict, offset: int = 0) -> InlineKeyboardMar
         nav = []
         if has_prev:
             nav.append(InlineKeyboardButton(text="⬅️ Назад", callback_data=f"menu_{offset - CATS_PER_PAGE}"))
+        
         page_num = offset // CATS_PER_PAGE + 1
         total_pages = (len(categories) + CATS_PER_PAGE - 1) // CATS_PER_PAGE
+        
+        # Индикатор страницы
         nav.append(InlineKeyboardButton(text=f"{page_num}/{total_pages}", callback_data="noop"))
+        
         if has_next:
             nav.append(InlineKeyboardButton(text="Вперёд ➡️", callback_data=f"menu_{offset + CATS_PER_PAGE}"))
 
         rows.append(nav)
 
+    # Стандартная навигация снизу
     rows.append([InlineKeyboardButton(text="🏠 Главная", callback_data="home")])
 
     return InlineKeyboardMarkup(inline_keyboard=rows)

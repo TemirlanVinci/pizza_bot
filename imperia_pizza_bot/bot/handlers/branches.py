@@ -28,9 +28,9 @@ async def cb_branches_page(cb: CallbackQuery, state: FSMContext) -> None:
         return
 
     await cb.message.edit_text(
-        text="📍 **Наши филиалы**\nВыберите удобный для вас филиал:",
+        text="📍 <b>Наши филиалы</b>\n\nВыберите удобный для вас филиал:",
         reply_markup=kb_pickup_branches(branches, offset),
-        parse_mode="Markdown"
+        parse_mode="HTML"
     )
     await cb.answer()
 
@@ -52,17 +52,17 @@ async def cb_branch_detail(cb: CallbackQuery, state: FSMContext) -> None:
     saved_offset = user_data.get("branch_offset", 0)
     
     text = (
-        f"🏢 **Филиал:** {branch_detail.get('name')}\n"
-        f"📍 **Адрес:** {branch_detail.get('address')}\n"
-        f"🕒 **Режим работы:** {branch_detail.get('work_hours')}\n"
-        f"📞 **Телефон:** {branch_detail.get('phone')}\n\n"
-        f"🔗 [Открыть на карте 2ГИС]({branch_detail.get('map_link')})"
+        f"🏢 <b>Филиал:</b> {branch_detail.get('name')}\n"
+        f"📍 <b>Адрес:</b> {branch_detail.get('address')}\n"
+        f"🕒 <b>Режим работы:</b> {branch_detail.get('work_hours')}\n"
+        f"📞 <b>Телефон:</b> {branch_detail.get('phone')}\n\n"
+        f"🔗 <a href='{branch_detail.get('map_link')}'>Открыть на карте 2ГИС</a>"
     )
     
     await cb.message.edit_text(
         text=text,
         reply_markup=kb_back_to_branches(saved_offset),
-        parse_mode="Markdown",
+        parse_mode="HTML",
         disable_web_page_preview=False
     )
     await cb.answer()

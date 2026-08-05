@@ -12,12 +12,12 @@ def build_cart_text(cart: dict) -> str:
     for item in cart["items"]:
         lines.append(
             f"<b>{item['name']}</b>\n"
-            f"💰 {item['price']} c × {item['quantity']} шт = <b>{item['total_item_price']} c</b>\n"
+            f"💰 {item['price']} сом × {item['quantity']} шт = <b>{item['total_item_price']} сом</b>\n"
         )
     lines.append(
-        f"——————————————————————\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━\n"
         f"Всего товаров: <b>{cart['total_quantity']}</b>\n"
-        f"Итого к оплате: <b>{cart['final_price']} c</b>"
+        f"Итого к оплате: <b>{cart['final_price']} сом</b>"
     )
     return "\n".join(lines)
 

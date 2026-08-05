@@ -21,10 +21,15 @@ async def show_products(cb: CallbackQuery, product_id: int) -> None:
     fav_ids = {f["id"] for f in (favs or [])}
     is_fav = product_id in fav_ids
 
-    desc = f"\n{product['description']}\n\n" if product.get("description") else "\n"
+    desc = f"{product['description']}\n\n" if product.get("description") else ""
     weight = f"⚖️ {product['weight']} г\n\n" if product.get("weight") else ""
 
-    text = f"<b>{product['name']}\n</b>{desc}{weight}💰 <b>{product['price']} с</b>"
+    text = (
+        f"<b>{product['name']}</b>\n\n"
+        f"{desc}"
+        f"{weight}"
+        f"💰 <b>{product['price']} сом</b>"
+    )
     photo = product.get("image_url")
     markup = kb_product_actions(product_id, is_fav)
 
@@ -82,6 +87,6 @@ async def cb_cart_add_from_catalog(cb: CallbackQuery) -> None:
     res = await cart_add(cb.from_user.id, product_id)
 
     if res and res.get("status") == "success":
-        await cb.answer("🛍️ Товар добавлен в корзину!", show_alert=False)
+        await cb.answer("🛒 Товар добавлен в корзину!", show_alert=False)
     else:
         await cb.answer("Не удалось добавить товар.", show_alert=True)

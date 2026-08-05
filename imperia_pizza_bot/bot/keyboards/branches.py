@@ -19,24 +19,33 @@ def kb_pickup_branches(branches: list, offset: int = 0) -> InlineKeyboardMarkup:
         full_name = f"{name} ({address})" if address else name
         status_text = full_name if is_active else f"❌ {full_name} (Закрыт)"
 
-        # Для самовывоза делаем отдельный префикс отклика
+        # Определяем контекст по типу хендлера, который обрабатывает этот список. 
+        # Если это просмотр филиалов из главного меню, используем префикс просмотра "branch_", 
+        # иначе оставляем "order_pickbr_" для оформления заказа.
+        # В данном контексте универсальнее использовать просмотр филиалов, 
+        # а при чекауте можно передавать отдельный флаг или использовать отдельную клавиатуру.
+        # Здесь делаем безопасный роутинг через просмотр деталей:
+        
+        # Если бот открыт из меню филиалов, то клик должен вести на детальную информацию:
+        cb_data = f"branch_{b_id}_1" if is_active else f"branch_{b_id}_0"
+
         rows.append([
             InlineKeyboardButton(
                 text=status_text,
-                callback_data=f"order_pickbr_{b_id}"
+                callback_data=cb_data
             )
         ])
-
     
     nav = []
     if offset > 0:
         nav.append(InlineKeyboardButton(text="⬅️ Назад", callback_data=f"branchpage_{offset - BRANCHES_LIMIT}"))
 
     if len(branches) == BRANCHES_LIMIT:
-            nav.append(InlineKeyboardButton(text="Вперёд ➡️", callback_data=f"branchpage_{offset + BRANCHES_LIMIT}"))
+        nav.append(InlineKeyboardButton(text="Вперёд ➡️", callback_data=f"branchpage_{offset + BRANCHES_LIMIT}"))
+            
     if nav:
         page = offset // BRANCHES_LIMIT + 1
-        nav_center = InlineKeyboardButton(text=f"стр. {page}", callback_data="noop")
+        nav_center = InlineKeyboardButton(text=f"{page}", callback_data="noop")
 
         if len(nav) == 2:
             rows.append([nav[0], nav_center, nav[1]])
@@ -46,7 +55,7 @@ def kb_pickup_branches(branches: list, offset: int = 0) -> InlineKeyboardMarkup:
             rows.append([nav[0], nav_center])
 
     rows.append([
-        InlineKeyboardButton(text="❌ Отмена", callback_data="order_cancel")
+        InlineKeyboardButton(text="🏠 Главная", callback_data="home")
     ])
 
     return InlineKeyboardMarkup(inline_keyboard=rows)
@@ -55,6 +64,8 @@ def kb_pickup_branches(branches: list, offset: int = 0) -> InlineKeyboardMarkup:
 def kb_back_to_branches(offset: int = 0) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text="⬅️ К списку филиалов", callback_data=f"branchpage_{offset}"),
-            InlineKeyboardButton(text="🏠 Главная", callback_data="home")]
+            [
+                InlineKeyboardButton(text="⬅️ К списку", callback_data=f"branchpage_{offset}"),
+                InlineKeyboardButton(text="🏠 Главная", callback_data="home")
+            ]
         ])
